@@ -12,14 +12,7 @@ Sources = Makefile .gitignore
 
 ## Not a source on this public repo!!!!!
 
-c_visits.RData c_visits.Rout:
-	/bin/cp ../TZ_pediatric_HIV/$@ .
-
-Sources += sample.R
-sample.Rout: c_visits.RData sample.R
-	$(run-R)
-
-sample.RData:
+include R.mk
 
 ######################################################################
 
