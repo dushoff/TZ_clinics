@@ -1,12 +1,11 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: cd4look.Rout.visits.Rout 
+target pngtarget pdftarget vtarget acrtarget: enrolment.sample.Rout 
 
 cd4look.visits.Rout: keep.visits.Rout cd4look.R
 
 enrolment.sample.Rout: keep.sample.Rout enrolment.R
-	$(run-R)
 
 ##################################################################
 

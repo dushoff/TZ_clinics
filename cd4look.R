@@ -1,3 +1,5 @@
+load("~/tz_pediatric_hiv/c_visits.RData") # No_R_pipe
+
 cd4 <- subset(c_visits, !is.na(cd4))
 
 print(c(
