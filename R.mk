@@ -1,3 +1,5 @@
+## The data file is not available on this public repo. You need to copy it into your working directory
+children_visits.RData children_visits.Rout:
 
 ### Make a subsample for quicker comparison 
 
@@ -7,7 +9,8 @@ sample.Rout: children_visits.RData sample.R
 
 sample.RData:
 
-### Keep far too many variables :-)
+### Decide what variables to keep for a simpler data frame
+### JD wants less (we can always add more), but JN does not agree.
 
 Sources += keep.R
 keep.sample.RData keep.visits.RData:
@@ -18,3 +21,7 @@ keep.sample.Rout: sample.Rout keep.R
 keep.visits.Rout: children_visits.Rout keep.R
 	$(run-R)
 
+### Analyze something about enrolment
+
+Sources += enrolment.R
+enrolment.sample.Rout: keep.sample.Rout enrolment.R

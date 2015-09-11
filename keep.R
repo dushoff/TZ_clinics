@@ -50,3 +50,6 @@ keepvar <- c(
 )
 
 c_visits <- c_visits[keepvar]
+patients <- unique(c_visits$patientid)   
+
+# rdsave(c_visits, patients)

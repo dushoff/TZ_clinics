@@ -1,7 +1,10 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: sample.Rout 
+target pngtarget pdftarget vtarget acrtarget: enrolment.sample.Rout 
+
+enrolment.sample.Rout: keep.sample.Rout enrolment.R
+	$(run-R)
 
 ##################################################################
 
@@ -9,10 +12,10 @@ target pngtarget pdftarget vtarget acrtarget: sample.Rout
 
 Sources = Makefile .gitignore
 
-## Not a source on this public repo!!!!!
-
 Sources += R.mk
 include R.mk
+
+-include crib.mk
 
 ######################################################################
 
