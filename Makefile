@@ -3,7 +3,7 @@ current: target
 
 target pngtarget pdftarget vtarget acrtarget: cd4look.Rout.visits.Rout 
 
-cd4look.Rout.visits.Rout: keep.visits.Rout cd4look.R
+cd4look.visits.Rout: keep.visits.Rout cd4look.R
 
 enrolment.sample.Rout: keep.sample.Rout enrolment.R
 	$(run-R)
