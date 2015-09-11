@@ -12,6 +12,7 @@ Sources = Makefile .gitignore
 
 ## Not a source on this public repo!!!!!
 
+Sources += R.mk
 include R.mk
 
 ######################################################################
