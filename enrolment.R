@@ -40,32 +40,13 @@ c_patients <- summarise(group_by(c_visits, patientid)
 
 summary(c_patients)
 
-### Mike's dplyr attempt
+### Mike's new dplyr code
 
-### Please use dplyr:::select to simplfy the dataset as much as possible before
-
-### running the code for faster computation (you can run full dataset if you want
-
-### but it will be a bit slower
-
-
-### Reduced dataset must contain columns patientid, visitnum, visitdate, cd4
-
-
-ddays<- function(dat){
-
-    firstcd <- dat %>% group <- by(patientid) %>% filter(!is.na(cd4)) %>% filter(row <- number() == 1)
-
-    firstdate <- dat %>% group <- by(patientid) %>% filter(row <- number()==1)
-
-    join <- rbind(firstdate,firstcd)
-
-    newdat <- join %>% group <- by(patientid) %>% mutate(diff = visitdate-min(visitdate)) %>%
-
-          filter(diff == max(diff)) %>% filter(row <- number()==1) %>% filter(!is.na(cd4)) %>% arrange(patientid)
-
-    return(newdat)
-
+newdday <- function(dat){
+  newdat <- dat %>% group_by(patientid) %>% 
+    mutate(diffday = visitdate - min(visitdate)) %>% 
+    filter(!is.na(cd4)) %>% filter(diffday == min(diffday))
 }
+
 
 
