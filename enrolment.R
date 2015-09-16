@@ -40,13 +40,22 @@ c_patients <- summarise(group_by(c_visits, patientid)
 
 summary(c_patients)
 
-### Mike's new dplyr code
+### Mike's new dplyr code as modified by JD
 
-newdday <- function(dat){
-  newdat <- dat %>% group_by(patientid) %>% 
-    mutate(diffday = visitdate - min(visitdate)) %>% 
-    filter(!is.na(cd4)) %>% filter(diffday == min(diffday))
-}
+c_visits <- (c_visits
+	%>% group_by(patientid) 
+	%>% mutate(diffday = visitdate - min(visitdate))
+	%>% filter(!is.na(cd4))
+	%>% filter(diffday == min(diffday))
+)
 
+##### Testing ######
 
+pat0 <- "01-01-0100-001791"
+pat1 <- "01-01-0100-001890"
+
+print(as.data.frame(subset(c_visits, 
+	patientid==pat0
+	| patientid==pat1
+)))
 
