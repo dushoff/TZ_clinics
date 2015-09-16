@@ -31,3 +31,8 @@ cd4look.%.Rout: keep.%.Rout cd4look.R
 Sources += enrolment.R
 enrolment.sample.Rout: keep.sample.Rout enrolment.R
 	$(run-R)
+
+Sources += firstdate.R
+firstdate.%.Rout: keep.%.Rout firstdate.R
+	$(run-R)
+
