@@ -3,7 +3,10 @@
 
 library(dplyr)
 
-load("~/tz_pediatric_hiv/keep.sample.RData") # No_R_pipe
+load("~/tz_pediatric_hiv/c_visits.RData") # should we move this file to github repo??
+
+
+
 
 # Pick a patient (currently we're looking for one with a baseline reading from not the first visit")
 pat0 <- "01-01-0100-001791"
@@ -58,4 +61,22 @@ print(as.data.frame(subset(c_visits,
 	patientid==pat0
 	| patientid==pat1
 )))
+
+### Preliminary plots with the CD4baseline data
+library(ggplot2)
+
+ggplot(c_visits, aes(x=as.numeric(diffday))) + geom_density() +
+    xlab('Day Lag') + ggtitle('CD4 Baseline Day Lag Density') + theme_bw()
+
+ggplot(c_visits, aes(x=age)) + geom_bar() + ggtitle('CD4 Baseline Age Groups') +
+    theme_bw()
+
+ggplot(c_visits, aes(x=age, y=weight, group=age)) + geom_boxplot() +
+    ggtitle('CD4 Baseline Weight of Each Age group') + theme_bw()
+
+### Look into the weights for quality control.
+
+### Need to establish Whostage Baseline
+
+
 
