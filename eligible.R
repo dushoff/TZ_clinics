@@ -4,6 +4,8 @@ library(dplyr)
 ### binary check for each visit 
 ### 0.5 if we need multiple conditions
 ### sum of all binary checks greater than 0.5 implies Eligible
+load("~/tz_pediatric_hiv/c_visits.RData") ## diddo using data from a different repo 
+
 
 eligible <- c_visits %>% select(c(cd4,patientid,age,cd4percent,whostage)) %>% rowwise() %>% mutate(cd4test = ifelse((cd4<351 & !is.na(cd4)),1,0),
                           cd4percenttest = ifelse(cd4percent<25 & !is.na(cd4percent),0.5,0),
@@ -13,4 +15,4 @@ eligible <- c_visits %>% select(c(cd4,patientid,age,cd4percent,whostage)) %>% ro
                           whtest1 = ifelse(whostage > 2 & !is.na(whostage) , 1,0),
                           eligible = ifelse(sum(cd4test,cd4percenttest,cd4test2,agetest1,agetest2,whtest1)>0.5,1,0))
 
-
+eligible$eligible
