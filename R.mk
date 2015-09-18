@@ -23,6 +23,7 @@ keep.visits.Rout: children_visits.Rout keep.R
 
 ### What do the cd4 data look like?
 Sources += cd4look.R
+cd4look.visits.Rout: cd4look.R
 cd4look.%.Rout: keep.%.Rout cd4look.R
 	$(run-R)
 
