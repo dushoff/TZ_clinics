@@ -33,6 +33,7 @@ enrolment.sample.Rout: keep.sample.Rout enrolment.R
 	$(run-R)
 
 ### Eligibility logic
+Sources += eligible.R
 eligible.sample.Rout: eligible.R
 eligible.%.Rout: keep.%.Rout eligible.R
 	$(run-R)
