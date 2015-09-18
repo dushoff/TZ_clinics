@@ -33,6 +33,8 @@ enrolment.sample.Rout: keep.sample.Rout enrolment.R
 	$(run-R)
 
 Sources += firstdate.R
+
+firstdate.sample.Rout: firstdate.R
 firstdate.%.Rout: keep.%.Rout firstdate.R
 	$(run-R)
 
