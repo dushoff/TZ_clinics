@@ -43,8 +43,10 @@ a <- sample(1:length(test$patientid),10)
 
 print(test[a,])
 
+### bad test cases .. when we have " logical" or "na" it will be NA, we want logical instead  
+
 bad <- "02-02-0101-000241"  ### problem (I think it is a NA logical problem)
 
 print(subset(test,test$patientid == bad))
 
-## need to try with some test cases
+print(test %>% filter(!is.na(cd4percent)) %>% filter((age > 2) & (age < 5)) %>% filter(cd4percent<25))
