@@ -38,7 +38,6 @@ eligible.sample.Rout: eligible.R
 eligible.%.Rout: keep.%.Rout eligible.R
 	$(run-R)
 
-
 Sources += firstdate.R
 
 firstdate.sample.Rout: firstdate.R
