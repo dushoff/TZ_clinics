@@ -28,10 +28,15 @@ cd4look.%.Rout: keep.%.Rout cd4look.R
 	$(run-R)
 
 ### Analyze something about enrolment
-
 Sources += enrolment.R
 enrolment.sample.Rout: keep.sample.Rout enrolment.R
 	$(run-R)
+
+### Eligibility logic
+eligible.sample.Rout: eligible.R
+eligible.%.Rout: keep.%.Rout eligible.R
+	$(run-R)
+
 
 Sources += firstdate.R
 
