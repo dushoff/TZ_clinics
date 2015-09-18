@@ -7,17 +7,46 @@ library(dplyr)
 load("~/tz_pediatric_hiv/c_visits.RData") ## No_R_pipe
 
 eligible <- (c_visits  %>%  rowwise()
-	%>% mutate(eligible = 
-		(cd4<351 & !is.na(cd4))
-		| (((cd4percent<25 | cd4<750) & !is.na(cd4percent))
-			& ((age>1) & (age<5) & !is.na(age)))
-		| (age<2 & !is.na(age))
-		| (whostage > 2 & !is.na(whostage))
-	)
-)
+	%>% mutate(eligible =
+                (visitdate > as.Date("2011-12-31") &        
+                    (age<2
+                    | ((cd4percent<25 | cd4<750)
+			    & ((age>1) & (age<5)))
+		    | (whostage > 2)
+                    | (cd4<351)))
+ 
+                |(visitdate < as.Date("2012-01-01") &
+                    (age<2
+                    |(as.numeric(visitdate - dateofbirth)<548  &
+                     ((cd4percent<20)))
+                    |((as.numeric(visitdate - dateofbirth)>547 & (age < 3)) &
+                     ((cd4percent<20 | cd4<750)))
+                    |(((age>2) & (age < 5)) &
+                     ((cd4percent<20 | cd4<750)))
+                    |((age > 4) &
+                     ((cd4percent<15 | cd4<200)))
+		    | (whostage > 2))
+)))
+                   
 
 print(eligible %>%
-	select(c(patientid,age,cd4,cd4percent,whostage,eligible))
+	select(c(patientid,age,visitdate,cd4,cd4percent,whostage,eligible))
 )
 
-## need to try with some test cases
+
+test <- (eligible %>%
+	select(c(patientid,age,visitdate,cd4,cd4percent,whostage,eligible))
+
+)      
+
+a <- sample(1:length(test$patientid),10)
+
+print(test[a,])
+
+### bad test cases .. when we have " logical" or "na" it will be NA, we want logical instead  
+
+bad <- "02-02-0101-000241"  ### problem (I think it is a NA logical problem)
+
+print(subset(test,test$patientid == bad))
+
+print(test %>% filter(!is.na(cd4percent)) %>% filter((age > 2) & (age < 5)) %>% filter(cd4percent<25))
