@@ -9,21 +9,23 @@ load("~/tz_pediatric_hiv/c_visits.RData") ## No_R_pipe
 eligible <- (c_visits  %>%  rowwise()
 	%>% mutate(eligible =
                 (visitdate > as.Date("2011-12-31") &        
-                    (age<2 & !is.na(age)
-                    | (((cd4percent<25 | cd4<750) & !is.na(cd4percent))
-			    & ((age>1) & (age<5) & !is.na(age)))
-		    | (whostage > 2 & !is.na(whostage))
-                    | (cd4<351 & !is.na(cd4)))) 
+                    (age<2
+                    | ((cd4percent<25 | cd4<750)
+			    & ((age>1) & (age<5)))
+		    | (whostage > 2)
+                    | (cd4<351)))
  
                 |(visitdate < as.Date("2012-01-01") &
-                    (age<2 & !is.na(age)
+                    (age<2
                     |(as.numeric(visitdate - dateofbirth)<548  &
-                     ((cd4percent<20 | cd4<750) & !is.na(cd4percent)))
+                     ((cd4percent<20)))
                     |((as.numeric(visitdate - dateofbirth)>547 & (age < 3)) &
-                     ((cd4percent<20 | cd4<351) & !is.na(cd4percent)))
+                     ((cd4percent<20 | cd4<750)))
+                    |(((age>2) & (age < 5)) &
+                     ((cd4percent<20 | cd4<750)))
                     |((age > 4) &
-                     ((cd4percent<15 | cd4<200) & !is.na(cd4percent)))
-		    | (whostage > 2 & !is.na(whostage)))
+                     ((cd4percent<15 | cd4<200)))
+		    | (whostage > 2))
 )))
                    
 
@@ -37,10 +39,12 @@ test <- (eligible %>%
 
 )      
 
-a <- sample(1:10000,10)
+a <- sample(1:length(test$patientid),10)
 
 print(test[a,])
 
+bad <- "02-02-0101-000241"  ### problem (I think it is a NA logical problem)
 
-sample(unique(eligible$patientid),1)
+print(subset(test,test$patientid == bad))
+
 ## need to try with some test cases
