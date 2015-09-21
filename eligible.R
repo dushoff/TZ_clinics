@@ -10,7 +10,7 @@ eligible <- (c_visits  %>%  rowwise()
 	%>% mutate(eligible =
                 (visitdate > as.Date("2011-12-31") &        
                     (age<2
-                    | ((cd4percent<25 | cd4<750)
+                    | (((cd4percent<25 & !is.na(cd4percent)) | (cd4<750 & !is.na(cd4)))
 			    & ((age>1) & (age<5)))
 		    | (whostage > 2)
                     | (cd4<351)))
@@ -20,11 +20,11 @@ eligible <- (c_visits  %>%  rowwise()
                     |(as.numeric(visitdate - dateofbirth)<548  &
                      ((cd4percent<20)))
                     |((as.numeric(visitdate - dateofbirth)>547 & (age < 3)) &
-                     ((cd4percent<20 | cd4<750)))
+                     (((cd4percent<20 & !is.na(cd4percent)) | (cd4<750 & !is.na(cd4)))))
                     |(((age>2) & (age < 5)) &
-                     ((cd4percent<20 | cd4<750)))
+                     (((cd4percent<20 & !is.na(cd4percent)) | (cd4<350 & !is.na(cd4)))))
                     |((age > 4) &
-                     ((cd4percent<15 | cd4<200)))
+                     (((cd4percent<15 & !is.na(cd4percent)) | (cd4<200 & !is.na(cd4)))))
 		    | (whostage > 2))
 )))
                    
