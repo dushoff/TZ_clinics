@@ -11,7 +11,7 @@ arvyear <- ( year %>% group_by(patientid) %>% filter(arvstatuscode == "Start ARV
 
 newdat <- (arvyear %>% select(c(startyear,arvyear)))
 
-newdat2 <- (gather(test3[,2:3],startyear,arvyear))
+newdat2 <- (gather(newdat[,2:3],startyear,arvyear))
 
 
 all <- (year %>% filter(visitnum == 1) %>% select(startyear) %>% group_by(startyear))
