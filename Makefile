@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: eligible.sample.Rout 
+target pngtarget pdftarget vtarget acrtarget: combineInfo.sample.Rout 
 
 ##################################################################
 
