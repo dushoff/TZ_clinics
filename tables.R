@@ -1,18 +1,23 @@
 library(dplyr)
 library(tidyr)
-load("~/tz_pediatric_hiv/c_visits.RData")
 
-year <- (c_visits %>% select(patientid,arvstatuscode,visitdate,visitnum) %>%
-             group_by(patientid) %>% 
-         mutate(startyear = as.numeric(format(min(visitdate),"%Y"))))
+load("~/tz_pediatric_hiv/c_visits.RData") # No_R_pipe
 
-arvyear <- ( year %>% group_by(patientid) %>% filter(arvstatuscode == "Start ARV")
-          %>% mutate(arvyear = as.numeric(format(min(visitdate),"%Y"))))
+year <- (c_visits
+	%>% select(patientid,arvstatuscode,visitdate,visitnum)
+	%>% group_by(patientid)
+	%>% mutate(startyear = as.numeric(format(min(visitdate),"%Y")))
+)
+
+arvyear <- (year
+	%>% group_by(patientid)
+	%>% filter(arvstatuscode == "Start ARV")
+   %>% mutate(arvyear = as.numeric(format(min(visitdate),"%Y")))
+)
 
 newdat <- (arvyear %>% select(c(startyear,arvyear)))
 
 newdat2 <- (gather(newdat[,2:3],startyear,arvyear))   ##can't get how "gather" works here
-
 
 all <- (year %>% filter(visitnum == 1) %>% select(startyear) %>% group_by(startyear))
 
