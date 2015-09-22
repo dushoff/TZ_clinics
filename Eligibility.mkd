@@ -1,0 +1,46 @@
+Before 2012
+===========
+
+Children under 12 months of age
+-------------------------------
+
+Start ART regardless of CD4 results or WHO clinical stage.
+
+12-18 months
+------------
+
+Initiate ART regardless of CD4% for WHO Paediatric Clinical Stages 3 & 4. 
+
+For WHO Paediatric stage 1 & 2 perform CD4+ % T cell measure and if found < 20% Initiate ART if >20% do not Initiate ART but monitor the patient regularly.
+
+> 18 months;
+------------
+
+If in WHO Paediatric Clinical Stage 3 or 4 initiate ART irrespective of CD4%.
+
+If in WHO Paediatric Clinical Stage 1 or 2 initiate ART if,
+* CD4 <20% (<750 cells/mm3 ) for children between 19-35 months of age.
+* CD4 <20% (350 cells/mm3) for children between 36-59 months of age.
+* CD4 < 15% (200 cells/mm3) for children >= 5 years old.
+
+2012 until Mar 31 2015
+======================
+
+Children under 24 months of age
+-------------------------------
+
+Start ART regardless of CD4 results or WHO clinical stage.
+
+Between 24-59 months
+--------------------
+
+initiate ART if CD4 < 25% (750 cells/mm3 ).
+If in age > 24 months and in WHO clinical stage 4 or 3, initiate ART
+If in age > 24 months and in WHO clinical stage 1 or 2 initiate ART if CD4 < 25% (750 cells/mm3 ) , don't initiate ART if CD4 > 25% or if no CD4 test is available.
+If in age above 5 years, initiate ART if CD4 < 350 cells/mm3
+
+After April 1 2015
+==================
+
+__Treat the children! __
+

@@ -18,6 +18,8 @@ include R.mk
 
 ######################################################################
 
+Sources += Eligibility.mkd
+
 ms = ../makestuff
 
 -include $(ms)/local.mk

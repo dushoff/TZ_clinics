@@ -49,3 +49,6 @@ firstdate.%.Rout: keep.%.Rout firstdate.R
 Sources += tables.R
 tables.Rout: keep.visits.Rout tables.R
 	$(run-R)
+
+#### Working now on better eligibility logic #####
+Sources += combineInfo.R
