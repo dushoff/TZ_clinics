@@ -11,17 +11,17 @@ arvyear <- ( year %>% group_by(patientid) %>% filter(arvstatuscode == "Start ARV
 
 newdat <- (arvyear %>% select(c(startyear,arvyear)))
 
-newdat2 <- (gather(newdat[,2:3],startyear,arvyear))
+newdat2 <- (gather(newdat[,2:3],startyear,arvyear))   ##can't get how "gather" works here
 
 
 all <- (year %>% filter(visitnum == 1) %>% select(startyear) %>% group_by(startyear))
 
-allcount <- (count(all,startyear))
+allcount <- (count(all,startyear))   ## Is this counting all patients by their visit number one per startyear?
 newtable <- (count(newdat2,startyear,arvyear) %>% ungroup %>% arrange(startyear))
 yeartotal <- (count(newdat2,startyear) %>% ungroup %>% arrange(startyear))
 
 newtable2 <- (matrix(NA,nrow=4,ncol=5))
-newtable2[1,1] <- (newtable$n[1])
+newtable2[1,1] <- (newtable$n[1])      #are [1,1] these number stands for row number and column number for a table?
 newtable2[1,2] <- (newtable$n[2])
 newtable2[1,3] <- (newtable$n[3])
 newtable2[1,4] <- (newtable$n[4])
