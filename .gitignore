@@ -10,6 +10,7 @@ commit.txt
 *.bbl
 
 *.Rout
+*.Routput
 *.RR
 *.Rlog
 *.dmp
