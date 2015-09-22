@@ -44,3 +44,7 @@ firstdate.sample.Rout: firstdate.R
 firstdate.%.Rout: keep.%.Rout firstdate.R
 	$(run-R)
 
+#### Tables of ART eligibility and starting
+
+tables.Rout: keep.visits.Rout tables.R
+	$(run-R)

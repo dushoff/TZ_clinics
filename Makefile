@@ -5,6 +5,8 @@ target pngtarget pdftarget vtarget acrtarget: eligible.sample.Rout
 
 ##################################################################
 
+tables.Rout: keep.visits.Rout tables.R
+
 # make files
 
 Sources = Makefile .gitignore README.md
