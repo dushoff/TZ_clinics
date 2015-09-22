@@ -15,9 +15,10 @@ arvyear <- (year
    %>% mutate(arvyear = as.numeric(format(min(visitdate),"%Y")))
 )
 
-newdat <- (arvyear %>% select(c(startyear,arvyear)))
+tmpd <- (arvyear %>% select(c(startyear,arvyear)))
 
-newdat2 <- (gather(newdat[,2:3],startyear,arvyear))   ##can't get how "gather" works here
+### Collapse columns into key/value pairs. JD does not like it.
+gather_by_year <- (gather(tmpd[,2:3],startyear,arvyear)) 
 
 all <- (year %>% filter(visitnum == 1) %>% select(startyear) %>% group_by(startyear))
 
