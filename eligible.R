@@ -6,29 +6,36 @@ library(dplyr)
 ## Also, why not use a better data file, like keep.visits or keep.sample?
 load("~/tz_pediatric_hiv/c_visits.RData") ## No_R_pipe
 
+combineInfo <- function(test1, test2){
+	if(!is.na(test1)) return(test1)
+	return(test2)
+}
+
+year <- 365.25
+
+c_visits <- (c_visits
+	%>% mutate(ageDays=as.numeric(visitdate - dateofbirth))
+)
+
+########### 	WE ARE IN THE MIDDLE OF CONSTRUCTING ELIGIBLE WITH NEW LOGIC!!! #############
+
+# We can do one-way age comparisons because criteria are nested
+# (we are always more likely to treat younger children)
 eligible <- (c_visits 
 	%>%  rowwise()
 	%>% mutate(eligible =
-		(visitdate > as.Date("2011-12-31") &        
-	(age<2
-                    | (((cd4percent<25 & !is.na(cd4percent)) | (cd4<750 & !is.na(cd4)))
-			    & ((age>1) & (age<5)))
-		    | (whostage > 2)
-                    | (cd4<351)))
- 
-                |(visitdate < as.Date("2012-01-01") &
-                    (age<2
-                    |(as.numeric(visitdate - dateofbirth)<548  &
-                     ((cd4percent<20)))
-                    |((as.numeric(visitdate - dateofbirth)>547 & (age < 3)) &
-                     (((cd4percent<20 & !is.na(cd4percent)) | (cd4<750 & !is.na(cd4)))))
-                    |(((age>2) & (age < 5)) &
-                     (((cd4percent<20 & !is.na(cd4percent)) | (cd4<350 & !is.na(cd4)))))
-                    |((age > 4) &
-                     (((cd4percent<15 & !is.na(cd4percent)) | (cd4<200 & !is.na(cd4)))))
-		    | (whostage > 2))
-)))
-                   
+		(visitdate < as.Date("2012-01-01") &(
+			whostage >=3
+			| ageDays <= 365
+			| (ageDays <= round(1.5*year) & cd4percent<20)
+			| (ageDays <= round(3*year) &
+				combineInfo(cd4percent<20, cd4<750))
+			| (ageDays <= round(5*year) &
+				combineInfo(cd4percent<20, cd4<350))
+			| combineInfo(cd4percent<15, cd4<200)
+		))
+	)
+)
 
 print(eligible %>%
 	select(c(patientid,age,visitdate,cd4,cd4percent,whostage,eligible))
