@@ -24,7 +24,7 @@ c_visits <- (c_visits
 eligible <- (c_visits 
 	%>%  rowwise()
 	%>% mutate(eligible =
-		(visitdate < as.Date("2012-01-01") &(
+		visitdate < as.Date("2012-01-01") &(
 			whostage >=3
 			| ageDays <= 365
 			| (ageDays <= round(1.5*year) & cd4percent<20)
@@ -33,9 +33,16 @@ eligible <- (c_visits
 			| (ageDays <= round(5*year) &
 				combineInfo(cd4percent<20, cd4<350))
 			| combineInfo(cd4percent<15, cd4<200)
-		))
-	)
+		)
+                |(visitdate >= as.Date("2012-01-01") & (visitdate < as.Date("2015-04-01")) & (
+                        whostage >= 3
+                        | ageDays <= 365
+                        | (ageDays <= round(5*year) &
+                               combineInfo(cd4percent<25,cd4<750))
+                        | cd4<350)        
+           ))
 )
+             
 
 print(eligible %>%
 	select(c(patientid,age,visitdate,cd4,cd4percent,whostage,eligible))
@@ -47,7 +54,7 @@ test <- (eligible %>%
 
 )      
 
-a <- sample(1:length(test$patientid),10)
+a <- sample(1:length(test$patientid),20)
 
 print(test[a,])
 
@@ -57,4 +64,4 @@ bad <- "02-02-0101-000241"  ### problem (I think it is a NA logical problem)
 
 print(subset(test,test$patientid == bad))
 
-print(test %>% filter(!is.na(cd4percent)) %>% filter((age > 2) & (age < 5)) %>% filter(cd4percent<25))
+print(test %>% filter(whostage < 3) %>% filter(age<5))
