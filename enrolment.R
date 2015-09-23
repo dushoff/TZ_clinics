@@ -53,7 +53,7 @@ c_visits <- (c_visits
 firstdate <- function(dat){
     
 
-### Need Eligible data
+### Need Eligible data & testing case 
 
 source(eligible.R)
 
@@ -67,12 +67,16 @@ Datetable <- (eligible  %>% ungroup
 
 cd4check <- (Datetable %>% select(c(patientid,visitdate,enrolment_date,
                                      cd4,cd4percent,cd4_date)))
-print(cd4check)
 
 arvcheck <- (Datetable %>% select(c(patientid,visitdate,eligible,eligiblity_date,arvstatuscode,arv_date)))
 
-print(arvcheck)
+testcase <- (sample(unique(Datetable$patientid),1))
 
+print(cd4check %>% filter(patientid == testcase))
+print(arvcheck %>% filter(patientid == testcase))
+
+
+#### STOP HERE #####
 
 ##### Testing ######
 
