@@ -3,9 +3,7 @@
 
 library(dplyr)
 
-load("~/tz_pediatric_hiv/c_visits.RData") # should we move this file to github repo??
-
-
+load("~/tz_pediatric_hiv/c_visits.RData")
 
 
 # Pick a patient (currently we're looking for one with a baseline reading from not the first visit")
@@ -51,6 +49,30 @@ c_visits <- (c_visits
 	%>% filter(!is.na(cd4))
 	%>% filter(diffday == min(diffday))
 )
+
+firstdate <- function(dat){
+    
+
+### Need Eligible data
+
+source(eligible.R)
+
+Datetable <- (eligible  %>% ungroup 
+        %>% group_by(patientid)
+        %>% mutate(enrolment_date = min(visitdate),
+                   cd4_date = min(c(as.Date("2015-04-01"),subset(visitdate,!is.na(cd4)))),
+                   eligiblity_date = min(c(as.Date("2015-04-01"), subset(visitdate, !is.na(eligible) & eligible))),
+                   arv_date = min(as.Date(c(as.Date("2015-04-01"),
+                                            subset(visitdate,arvstatuscode == "Start ARV"  & !is.na(arvstatuscode)))))))
+
+cd4check <- (Datetable %>% select(c(patientid,visitdate,enrolment_date,
+                                     cd4,cd4percent,cd4_date)))
+print(cd4check)
+
+arvcheck <- (Datetable %>% select(c(patientid,visitdate,eligible,eligiblity_date,arvstatuscode,arv_date)))
+
+print(arvcheck)
+
 
 ##### Testing ######
 
