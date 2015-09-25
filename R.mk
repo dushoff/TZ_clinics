@@ -27,21 +27,18 @@ cd4look.visits.Rout: cd4look.R
 cd4look.%.Rout: keep.%.Rout cd4look.R
 	$(run-R)
 
-### Analyze something about enrolment
-Sources += enrolment.R
-enrolment.sample.Rout: keep.sample.Rout enrolment.R
-	$(run-R)
-
 ### Eligibility logic
 Sources += eligible.R
-eligible.sample.Rout: eligible.R
+eligible.visits.Rout: eligible.R
 eligible.%.Rout: keep.%.Rout eligible.R
 	$(run-R)
 
-Sources += firstdate.R
+### Make a patient data frame with first dates for:
+###### enrolment, eligibility, cd4, ARV
 
+Sources += firstdate.R
 firstdate.sample.Rout: firstdate.R
-firstdate.%.Rout: keep.%.Rout firstdate.R
+firstdate.%.Rout: eligible.%.Rout firstdate.R
 	$(run-R)
 
 #### Tables of ART eligibility and starting
