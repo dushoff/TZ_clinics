@@ -36,5 +36,4 @@ repo = https://github.com/dushoff
 Makefile: $(ms)
 
 $(ms): 
-	cd $(dir $(ms))  && git clone $(repo)/$(notdir $(ms)).git
-	cd .. && git clone /makestuff.git
+	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
