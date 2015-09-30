@@ -23,8 +23,7 @@ include R.mk
 Sources += Eligibility.mkd
 
 ms = ../makestuff
-repo = git@github.com:dushoff
-
+repo = https://github.com/dushoff
 -include $(ms)/local.mk
 -include local.mk
 -include $(ms)/git.mk
@@ -38,3 +37,4 @@ Makefile: $(ms)
 
 $(ms): 
 	cd $(dir $(ms))  && git clone $(repo)/$(notdir $(ms)).git
+	cd .. && git clone /makestuff.git

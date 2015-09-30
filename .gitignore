@@ -18,5 +18,7 @@ commit.txt
 
 *.out
 
+subclone_dir/
+testdir/
 
 compiler.mk
