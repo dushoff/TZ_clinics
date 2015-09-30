@@ -1,5 +1,5 @@
 ## The data file is not available on this public repo. You need to copy it into your working directory
-children_visits.RData children_visits.Rout:
+Outside = children_visits.RData
 
 ### Make a subsample for quicker comparison 
 
