@@ -11,6 +11,8 @@ tables.Rout: keep.visits.Rout tables.R
 
 Sources = Makefile .gitignore README.md
 
+Outside = children_visits.RData
+
 Sources += R.mk
 include R.mk
 
