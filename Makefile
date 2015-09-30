@@ -21,6 +21,7 @@ include R.mk
 Sources += Eligibility.mkd
 
 ms = ../makestuff
+repo = git@github.com:dushoff
 
 -include $(ms)/local.mk
 -include local.mk
@@ -30,3 +31,8 @@ ms = ../makestuff
 
 -include $(ms)/RR.mk
 # -include oldlatex.mk
+
+Makefile: $(ms)
+
+$(ms): 
+	cd $(dir $(ms))  && git clone $(repo)/$(notdir $(ms)).git
