@@ -9,8 +9,8 @@ minDate <- function(dates){
 }
 
 baseline <- function(cat){
-  if(length(subset(cat, !is.na(cat))==0)return((NA))
-  return(subset(cat, !is.na(cat))$[1])
+  if(length(subset(cat,!is.na(cat))==0)) return((NA))
+  return(subset(cat, !is.na(cat))[1])
 }
 
 year <- function(date){
