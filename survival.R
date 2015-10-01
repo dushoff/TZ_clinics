@@ -3,7 +3,7 @@
 library(survival)
 
 zerohack <- (Datetable %>% mutate(startdate = firstVisit - 1,
-                                  hack1 = fitstVisit -1, 
+                                  hack1 = firstVisit -1, 
                                  hack20 = firstVisit - 20)
 )
 
@@ -26,6 +26,30 @@ lines(survfit(fit2),col=4)
 
 
 ##?!? still don't overlap??
+
+##first do table 3 from Joseph's docx
+
+ARTeligi <- function(cat,logic){
+  data.frame(Factor = cat,
+             "<2" = nrow(subset(zerohack,logic & zerohack$age < 1)),
+             "2-5" = nrow(subset(zerohack,logic & zerohack$age >= 2 & zerohack$age <= 5)),
+             "6-9" = nrow(subset(zerohack,logic & zerohack$age >= 6 & zerohack$age <= 9)),
+             "10-14" = nrow(subset(zerohack,logic & zerohack$age >= 10 & zerohack$age <= 14)),
+             Total = nrow(subset(zerohack,logic)))
+  
+}
+
+time_ARTenrolment <- (rbind(
+  ARTeligi("Enrolment", !is.na(zerohack$arv_date))
+  ,ARTeligi("Within 1 month",(as.numeric(zerohack$arv_date)- as.numeric(zerohack$startdate)) <= 30)
+  ,ARTeligi("Within 2 month",(as.numeric(zerohack$arv_date)- as.numeric(zerohack$startdate)) <= 60)
+  ,ARTeligi("Within 3 month",(as.numeric(zerohack$arv_date)- as.numeric(zerohack$startdate)) <= 90)
+  ,ARTeligi("Within 6 month",(as.numeric(zerohack$arv_date)- as.numeric(zerohack$startdate)) <= 180)
+  ,ARTeligi("Within 12 month",(as.numeric(zerohack$arv_date)- as.numeric(zerohack$startdate)) <= 365)
+  ,ARTeligi("> 12 month",(as.numeric(zerohack$arv_date)- as.numeric(zerohack$startdate)) > 365)
+  ,ARTeligi("Not yet started", is.na(zerohack$arv_date))
+))
+time_ARTenrolment
 
 SurARV <- Surhack1
 
