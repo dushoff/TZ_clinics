@@ -1,8 +1,6 @@
 library(dplyr)
 library(tidyr)
 
-load("~/tz_pediatric_hiv/c_visits.RData") # No_R_pipe
-
 year <- (c_visits
 	%>% select(patientid,arvstatuscode,visitdate,visitnum)
 	%>% group_by(patientid)
