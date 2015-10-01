@@ -18,7 +18,7 @@ keep.sample.RData keep.visits.RData:
 keep.sample.Rout: sample.Rout keep.R
 	$(run-R)
 
-keep.visits.Rout: children_visits.Rout keep.R
+keep.visits.Rout: children_visits.RData keep.R
 	$(run-R)
 
 ### What do the cd4 data look like?
