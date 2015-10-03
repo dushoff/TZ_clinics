@@ -30,7 +30,7 @@ repo = https://github.com/dushoff
 
 -include $(ms)/visual.mk
 
--include $(ms)/RR.mk
+-include $(ms)/wrapR.mk
 # -include oldlatex.mk
 
 Makefile: $(ms)
