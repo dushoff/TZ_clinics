@@ -5,6 +5,12 @@ target pngtarget pdftarget vtarget acrtarget: firstdate.visits.Rout
 
 ##################################################################
 
+ms = ../makestuff
+-include $(ms)/git.def
+
+test:
+	echo $(parallel)
+
 tables.Rout: keep.visits.Rout tables.R
 
 # make files
@@ -22,7 +28,6 @@ include R.mk
 
 Sources += Eligibility.mkd
 
-ms = ../makestuff
 repo = https://github.com/dushoff
 -include $(ms)/local.mk
 -include local.mk
@@ -33,7 +38,13 @@ repo = https://github.com/dushoff
 -include $(ms)/wrapR.mk
 # -include oldlatex.mk
 
-Makefile: $(ms)
+Makefile: wrapR.makestuff
+
+%.makestuff:
+	cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
+	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
+	cd $(dir $(ms)) && rm -rf $(ms) .$(notdir $(ms))
+	touch $@
 
 $(ms): 
 	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
