@@ -20,7 +20,9 @@ lines(Surhack20, col=2)
 fit <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack1),!is.na(arv_date))~1,data=zerohack)
 fit2 <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack20), !is.na(arv_date))~1, data=zerohack)
 
+
 plot(survfit(fit))
+plot(survfit(fit),xlim=c(0,50))
 lines(SurARV,col=2)
 lines(survfit(fit2),col=4)
 
@@ -65,12 +67,22 @@ legend('topright',c("ARV","CD4","Eligibility"),col=c("black","red","green"),lty=
 
 
 SurARV_sex<-update(SurARV,.~sex)
-plot(SurARV_sex, xlab = "Time", ylab = "Survival Probability", lty=1)
+plot(SurARV_sex, xlab = "Time", ylab = "Survival Probability", lty=1,col=1:2)
 
 SurEligible_sex <- update(SurEligible,.~sex)
 plot(SurEligible_sex, xlab = "Time", ylab = "Survival Probability", lty=1)
 
 SurARV_whostage <- update(SurARV, . ~ base_whostage)
-plot(SurARV_whostage)
+plot(SurARV_whostage , col=c(1:4))
 
 
+
+
+SurARV_crazy<-update(SurARV,.~age + start_year)
+
+mod <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack1),!is.na(arv_date))~age + start_year,data=zerohack)
+summary(mod)
+
+plot(SurARV_crazy, xlab = "Time", ylab = "Survival Probability", lty=1)
+
+summary(SurARV)
