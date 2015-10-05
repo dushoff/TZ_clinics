@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: firstdate.visits.Rout 
+target pngtarget pdftarget vtarget acrtarget: tables.sample.Rout 
 
 ##################################################################
 
@@ -18,7 +18,8 @@ tables.Rout: keep.visits.Rout tables.R
 Sources = Makefile .gitignore README.md
 
 Outside = children_visits.RData
-
+dushoff_update:
+	/bin/cp /home/dushoff/Dropbox/ICI3D/children_visits.RData .
 Sources += R.mk
 include R.mk
 

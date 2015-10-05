@@ -1,5 +1,4 @@
 ## The data file is not available on this public repo. You need to copy it into your working directory
-Outside = children_visits.RData
 
 ### Make a subsample for quicker comparison 
 
@@ -45,6 +44,7 @@ firstdate.%.Rout: eligible.%.Rout firstdate.R
 
 Sources += tables.R
 tables.visits.Rout: keep.visits.Rout tables.R
+tables.%.Rout: keep.%.Rout tables.R
 	$(run-R)
 
 #### Working now on better eligibility logic #####
