@@ -12,6 +12,7 @@ commit.txt
 *.Rout
 *.Routput
 *.RR
+*.wrapR.*
 *.Rlog
 *.dmp
 *.RData

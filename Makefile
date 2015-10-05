@@ -28,7 +28,6 @@ include R.mk
 
 Sources += Eligibility.mkd
 
-repo = https://github.com/dushoff
 -include $(ms)/local.mk
 -include local.mk
 -include $(ms)/git.mk
@@ -38,8 +37,11 @@ repo = https://github.com/dushoff
 -include $(ms)/wrapR.mk
 # -include oldlatex.mk
 
+### Makestuff
+
 Makefile: wrapR.makestuff
 
+repo = https://github.com/dushoff
 %.makestuff:
 	cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
 	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
