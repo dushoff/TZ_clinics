@@ -7,7 +7,7 @@ TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1,
                                  hack20 = firstVisit - 20)
 )
 
-fit <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack1),!is.na(arv_date))~1,data=TZsurdat)
+fit <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack1),!is.na(arv_date))~1,data=TZsurdat)   ##so this is for all with ARV start date, how abt those who died before start ARV (Missing ARV start date)
 fit2 <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack20), !is.na(arv_date))~1, data=TZsurdat)
 
 summary(fit)
@@ -46,7 +46,7 @@ SurCD4 <- survfit(Surv(as.numeric(cd4_date)-as.numeric(startdate), !is.na(cd4_da
 SurEligible <- survfit(Surv(as.numeric(eligible_date)-as.numeric(startdate), !is.na(eligible_date))~1, data=TZsurdat)
 
 
-plot(SurARV,col=1, xlab = "Time", ylab="Survival Probability",lty=1)
+plot(SurARV,col=1, xlab = "Time", ylab="Survival Probability",lty=1)  ##since access to ART is a "success" lets think of probability to start from 0-1 than 1-0
 lines(SurCD4,col=2,lty=1)
 lines(SurEligible,col=3,lty=1)
 legend('topright',c("ARV","CD4","Eligibility"),col=c("black","red","green"),lty=1)
