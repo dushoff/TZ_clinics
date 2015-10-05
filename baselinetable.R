@@ -31,7 +31,39 @@ baseline_enrollment <- (rbind(
   ,baselinecat("CD4 cell count: 50-199",Datetable$base_cd4 >= 50 & Datetable$base_cd4 <=199)
   ,baselinecat("CD4 cell count: >=200",Datetable$base_cd4 >= 200)
   ,baselinecat("CD4 cell count: missing",is.na(Datetable$base_cd4))
+  ,baselinecat("Facility Type : Dispensary", Datetable$base_facility == 1)
+  ,baselinecat("Facility Type : Health Centre", Datetable$base_facility == 2)
+  ,baselinecat("Facility Type : Hospital", Datetable$base_facility == 3)
+  ,baselinecat("Facility Type : Other", Datetable$base_facility == 4)
+  ,baselinecat("Facility Type : Missing", is.na(Datetable$base_facility))
+  ,baselinecat("Referred From : HBC", Datetable$base_referred == 1)
+  ,baselinecat("Referred From : PITC", Datetable$base_referred == 12)
+  ,baselinecat("Referred From : PMTCT", Datetable$base_referred == 14)
+  ,baselinecat("Referred From : VCT", Datetable$base_referred == 25)
+  ,baselinecat("Referred From : Missing", is.na(Datetable$base_referred))
+  ,baselinecat("Positive for TB : Yes ",Datetable$base_TB == "CXR+" |
+                                        Datetable$base_TB == "TB Susp" |
+                                        Datetable$base_TB == "SS+" |
+                                        Datetable$base_TB == "Conf/Yes" |
+                                        Datetable$base_TB == "TB SUSP")
+  ,baselinecat("Positive for TB : No ", Datetable$base_TB == "CXR-" |
+                                        Datetable$base_TB == "SCR -ve" |
+                                        Datetable$base_TB == "SS-")
+  ,baselinecat("Positive for TB : Missing", Datetable$base_TB == "")
+  ,baselinecat("Malnourished : No", Datetable$base_Malnourshed == "OK")
+  ,baselinecat("Malnourished : Mild", Datetable$base_Malnourshed == "MLD")
+  ,baselinecat("Malnourished : Moderate", Datetable$base_Malnourshed == "MOD")
+  ,baselinecat("Malnourished : Severe", Datetable$base_Malnourshed == "SEV")
+  ,baselinecat("Malnourished : Missing", Datetable$base_Malnourshed == "")
 ))
+
+
+percentagetable <- (baseline_enrollment %>% transmute(Factor = Factor,
+                                                     X2011 = 100*X2011/Total,
+                                                     X2012 = 100*X2012/Total,
+                                                     X2013 = 100*X2013/Total,
+                                                     X2014 = 100*X2014/Total))
+
 
 ARTeligi <- function(cat,logic){
   data.frame(Factor = cat,
@@ -42,6 +74,8 @@ ARTeligi <- function(cat,logic){
              Total = nrow(subset(Datetable,logic)))
   
 }
+
+
 
 ARTEligibility <- (rbind(
   ARTeligi("Eligible", Datetable$base_eligible == TRUE)
