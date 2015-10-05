@@ -46,7 +46,8 @@ keepvar <- c(
 	"birthyear",
 	"death",
 	"status",
-	"statusdate"
+	"statusdate",
+	"medication2"
 )
 
 c_visits <- c_visits[keepvar]

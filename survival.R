@@ -1,20 +1,8 @@
 ###Survivial Analysis
-
+library(dplyr)
 library(survival)
 
-TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1,
-                                  hack1 = firstVisit -1, 
-                                 hack20 = firstVisit - 20)
-)
-
-fit <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack1),!is.na(arv_date))~1,data=TZsurdat)   ##so this is for all with ARV start date, how abt those who died before start ARV (Missing ARV start date)
-fit2 <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack20), !is.na(arv_date))~1, data=TZsurdat)
-
-summary(fit)
-summary(fit2)
-
-##good ! it doesn't matter how many days we hack
-
+TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1))
 ##first do table 3 from Joseph's docx
 
 ARTeligi <- function(cat,logic){
@@ -65,6 +53,6 @@ plot(SurARV_whostage , col=c(1:4),xlab = "Time", ylab = "Survival Probability", 
 legend('topright',c("1","2","3","4"),col=c("black","red","green","blue"),lty=1)
 
 
-mod <- coxph(Surv(as.numeric(arv_date)-as.numeric(hack1),!is.na(arv_date))~age + start_year,data=TZsurdat)
+mod <- coxph(Surv(as.numeric(arv_date)-as.numeric(startdate),!is.na(arv_date))~age + start_year,data=TZsurdat)
 summary(mod)
 

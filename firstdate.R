@@ -18,6 +18,9 @@ year <- function(date){
   return(as.numeric(format(date,"%Y")))
 }
 
+eligible$MED <- unclass(eligible$medication2)
+
+
 ##summarise will not include the other columns in eligible.RData
 ##combining baselines 
 
@@ -25,6 +28,8 @@ Datetable <- (summarise(group_by(eligible, patientid)
   , age = baseline(age)
   , sex = baseline(sex)
 	, firstVisit = minDate(visitdate)
+  , death_date = baseline(dateofdeath)
+  , death = baseline(death)
 	, cd4_date = as.Date(minDate(subset(visitdate, !is.na(cd4))))
 	, eligible_date = minDate(subset(visitdate,
 		!is.na(eligible) & eligible))
