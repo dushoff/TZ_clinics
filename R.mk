@@ -43,20 +43,13 @@ firstdate.%.Rout: eligible.%.Rout firstdate.R
 #### Tables of Baselines and starting
 
 Sources += baselinetables.R
-baselinetables.visits.Rout: baselinetable.visits.Rout baselinetables.R
 baselinetables.%.Rout: firstdate.%.Rout baselinetables.R
 	$(run-R)
-
 
 #### Survival stuff
 
 Sources += survival.R
 survival.visits.Rout: survival.visits.Rout survival.R
-surivial.%.Rout: baselinetables.%.Rout survival.R
-	$(run-R)
-
-#### Working now on better eligibility logic #####
-Sources += combineInfo.R
-combineInfo.sample.Rout: keep.sample.Rout combineInfo.R
+survival.%.Rout: baselinetables.%.Rout survival.R
 	$(run-R)
 
