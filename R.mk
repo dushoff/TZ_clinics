@@ -36,15 +36,23 @@ eligible.%.Rout: keep.%.Rout eligible.R
 ###### enrolment, eligibility, cd4, ARV
 
 Sources += firstdate.R
-firstdate.sample.Rout: firstdate.R
+firstdate.visits.Rout: firstdate.R
 firstdate.%.Rout: eligible.%.Rout firstdate.R
 	$(run-R)
 
-#### Tables of ART eligibility and starting
+#### Tables of Baselines and starting
 
-Sources += tables.R
-tables.visits.Rout: keep.visits.Rout tables.R
-tables.%.Rout: keep.%.Rout tables.R
+Sources += baselinetables.R
+baselinetables.visits.Rout: baselinetable.visits.Rout baselinetables.R
+baselinetables.%.Rout: firstdate.%.Rout baselinetables.R
+	$(run-R)
+
+
+#### Survival stuff
+
+Sources += survival.R
+survival.visits.Rout: survival.visits.Rout survival.R
+surivial.%.Rout: baselinetables.%.Rout survival.R
 	$(run-R)
 
 #### Working now on better eligibility logic #####
