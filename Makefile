@@ -44,9 +44,9 @@ Makefile: wrapR.makestuff
 
 repo = https://github.com/dushoff
 %.makestuff:
-	cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
+	-cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
 	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
-	cd $(dir $(ms)) && rm -rf $(ms) .$(notdir $(ms))
+	-cd $(dir $(ms)) && rm -rf $(ms) .$(notdir $(ms))
 	touch $@
 
 $(ms): 
