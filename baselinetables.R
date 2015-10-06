@@ -1,5 +1,4 @@
 ###summary table
-library(dplyr)
 
 baselinecat <- function(cat, logic){
   data.frame(Factor = cat,
