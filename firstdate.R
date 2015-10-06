@@ -8,14 +8,20 @@ minDate <- function(dates){
 	return(min(dates))
 }
 
+
+maxDate <- function(dates){
+  if(length(dates)==0) return ((NA))
+  return(max(dates))
+}
+
 baseline <- function(cat){
   if(length(subset(cat,!is.na(cat)))==0) return((NA))
   return(subset(cat, !is.na(cat))[1])
 }
 
-maxDate <- function(dates){
+LTFU <- function(dates){
   if(length(dates)==0)return((NA))
-  return(min(max(dates)+182.625,as.Date("2014-12-31")))
+  return(as.Date("2014-12-31")-max(dates) > 182.625)
 }
 
 year <- function(date){
@@ -33,7 +39,8 @@ Datetable <- (summarise(group_by(eligible, patientid)
   , age = baseline(age)
   , sex = baseline(sex)
 	, firstVisit = minDate(visitdate)
-  , LTFU_date = maxDate(visitdate)
+  , lastVisit = maxDate(visitdate)
+  , LTFU_status = LTFU(visitdate)
   , death_date = minDate(dateofdeath)
   , death = baseline(death)
 	, cd4_date = as.Date(minDate(subset(visitdate, !is.na(cd4))))
