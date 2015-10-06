@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: tables.sample.Rout 
+target pngtarget pdftarget vtarget acrtarget: survival.visits.Rout 
 
 ##################################################################
 

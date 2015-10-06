@@ -49,7 +49,7 @@ baselinetable.%.Rout: firstdate.%.Rout baselinetable.R
 #### Survival stuff
 
 Sources += survival.R
-survival.visits.Rout: survival.visits.Rout survival.R
+survival.visits.Rout: survival.R
 survival.%.Rout: baselinetable.%.Rout survival.R
 	$(run-R)
 
