@@ -1,6 +1,9 @@
 ###Survivial Analysis
 library(dplyr)
 library(survival)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
 
 TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1))
                                   
@@ -30,38 +33,103 @@ time_ARTenrolment <- (rbind(
 ))
 time_ARTenrolment
 
-SurARV <- survfit(Surv(as.numeric(arv_date)-as.numeric(startdate), !is.na(arv_date))~1, data=TZsurdat)
 
-SurCD4 <- survfit(Surv(as.numeric(cd4_date)-as.numeric(startdate), !is.na(cd4_date))~1, data=TZsurdat)
-
-SurEligible <- survfit(Surv(as.numeric(eligible_date)-as.numeric(startdate), !is.na(eligible_date))~1, data=TZsurdat)
-
-
-plot(SurARV,col=1, xlab = "Time", ylab="Survival Probability",lty=1)  ##since access to ART is a "success" lets think of probability to start from 0-1 than 1-0
-lines(SurCD4,col=2,lty=1)
-lines(SurEligible,col=3,lty=1)
-legend('topright',c("ARV","CD4","Eligibility"),col=c("black","red","green"),lty=1)
-
-
-SurARV_sex<-update(SurARV,.~sex)
-plot(SurARV_sex, xlab = "Time", ylab = "Survival Probability", lty=1,col=1:2,main="ARV Treatment")
-legend('topright',c("Male","Female"),col=c("black","red"),lty=1)
-
-SurEligible_sex <- update(SurEligible,.~sex)
-plot(SurEligible_sex, xlab = "Time", ylab = "Survival Probability", lty=1:2, main="Eligiblility")
-legend('topright',c("Male","Female"),col=c("black","red"),lty=1)
-
-SurARV_whostage <- update(SurARV, . ~ base_whostage)
-plot(SurARV_whostage , col=c(1:4),xlab = "Time", ylab = "Survival Probability", main="WHO Stage")
-legend('topright',c("1","2","3","4"),col=c("black","red","green","blue"),lty=1)
-
-
-mod <- survfit(Surv(as.numeric(TZsurdat$lastVisit)-as.numeric(TZsurdat$startdate),
+SurvEnrol <- survfit(Surv(as.numeric(TZsurdat$lastVisit)-as.numeric(TZsurdat$startdate),
                     TZsurdat$death == "No" & !is.na(TZsurdat$LTFU_status) & TZsurdat$LTFU_status == FALSE) ~1)
-plot(mod)
-mod2 <- survfit(Surv(as.numeric(TZsurdat$arv_date)-as.numeric(TZsurdat$startdate), !is.na(TZsurdat$arv_date))~1)
-mod2
-art <- data.frame(time= mod2$time, treated = mod2$n.event/29531)
 
-lines(art$time,cumsum(art$treated),lty=1)
+plot(SurvEnrol, conf.int=FALSE, xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
+plot(SurvEnrol, xlim= c(500,1000),xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
+plot(SurvEnrol, xlim= c(1,10),xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
+plot(SurvEnrol, mark.time=FALSE, conf.int = FALSE,xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
 
+artmod <- survfit(Surv(as.numeric(TZsurdat$arv_date)-as.numeric(TZsurdat$startdate), !is.na(TZsurdat$arv_date))~1)
+art <- data.frame(time= artmod$time, treated = artmod$n.event/29531)
+art <- art %>% mutate(cumprob = cumsum(treated))
+
+ggplot(art,aes(x=time,y=cumprob)) +xlab("Time") + ylab("Cumulative Probability") +
+  geom_line() + ggtitle("Proportation of ART") + theme_bw()
+
+artagemod <- update(artmod,.~+TZsurdat$age)
+artage <- data.frame(time=artagemod$time, treated = artagemod$n.event/artmod$n, age=0)
+
+artage$age[1:cumsum(artagemod$strata)[15]] <- 14 
+artage$age[1:cumsum(artagemod$strata)[14]] <- 13 
+artage$age[1:cumsum(artagemod$strata)[13]] <- 12 
+artage$age[1:cumsum(artagemod$strata)[12]] <- 11 
+artage$age[1:cumsum(artagemod$strata)[11]] <- 10 
+artage$age[1:cumsum(artagemod$strata)[10]] <- 9 
+artage$age[1:cumsum(artagemod$strata)[9]] <- 8
+artage$age[1:cumsum(artagemod$strata)[8]] <- 7
+artage$age[1:cumsum(artagemod$strata)[7]] <- 6
+artage$age[1:cumsum(artagemod$strata)[6]] <- 5
+artage$age[1:cumsum(artagemod$strata)[5]] <- 4
+artage$age[1:cumsum(artagemod$strata)[4]] <- 3
+artage$age[1:cumsum(artagemod$strata)[3]] <- 2
+artage$age[1:cumsum(artagemod$strata)[2]] <- 1
+artage$age[1:cumsum(artagemod$strata)[1]] <- 0
+
+artage <- artage %>% group_by(age) %>% mutate(cumprob = cumsum(treated))
+
+ggplot(artage,aes(x=time,y=cumprob,group=age,col=factor(age))) +xlab("Time") + ylab("Cumulative Probability") +
+  geom_line() + ggtitle("Proportation of Age in ART") + theme_bw()
+
+artwhomod <- update(artmod,.~+TZsurdat$base_whostage)
+artwho <- data.frame(time=artwhomod$time, treated = artwhomod$n.event/artmod$n, WHOstage=0)
+
+artwho$WHOstage[1:cumsum(artwhomod$strata)[4]] <- 4 
+artwho$WHOstage[1:cumsum(artwhomod$strata)[3]] <- 3  
+artwho$WHOstage[1:cumsum(artwhomod$strata)[2]] <- 2  
+artwho$WHOstage[1:cumsum(artwhomod$strata)[1]] <- 1 
+
+artwho <- artwho %>% group_by(WHOstage) %>% mutate(cumprob = cumsum(treated))
+
+ggplot(artwho,aes(x=time,y=cumprob,group=WHOstage,col=factor(WHOstage))) +xlab("Time") + ylab("Cumulative Probability") +
+  geom_line() + ggtitle("Proportation WHO stage in ART") + theme_bw()
+
+
+arthfmod <- update(artmod,.~+TZsurdat$base_facility)
+arthf <- data.frame(time=arthfmod$time, treated = arthfmod$n.event/artmod$n, HF=0)
+arthfmod$strata
+
+arthf$HF[1:cumsum(arthfmod$strata)[4]] <- "Other" 
+arthf$HF[1:cumsum(arthfmod$strata)[3]] <- "Hospital"  
+arthf$HF[1:cumsum(arthfmod$strata)[2]] <- "Health Centre"  
+arthf$HF[1:cumsum(arthfmod$strata)[1]] <- "Dispensary" 
+
+arthf <- arthf %>% group_by(HF) %>% mutate(cumprob = cumsum(treated))
+
+ggplot(arthf,aes(x=time,y=cumprob,group=HF,col=factor(HF))) +xlab("Time") + ylab("Cumulative Probability") +
+  geom_line() + ggtitle("Proportation HF in ART") + theme_bw()
+
+
+artyearmod <- update(artmod,.~+TZsurdat$start_year)
+artyear <- data.frame(time=artyearmod$time, treated = artyearmod$n.event/artmod$n, year=0)
+artyearmod$strata
+
+artyear$year[1:cumsum(artyearmod$strata)[4]] <- 2014 
+artyear$year[1:cumsum(artyearmod$strata)[3]] <- 2013 
+artyear$year[1:cumsum(artyearmod$strata)[2]] <- 2012  
+artyear$year[1:cumsum(artyearmod$strata)[1]] <- 2011 
+
+artyear <- artyear %>% group_by(year) %>% mutate(cumprob = cumsum(treated))
+
+ggplot(artyear,aes(x=time,y=cumprob,group=year,col=factor(year))) +xlab("Time") + ylab("Cumulative Probability") +
+  geom_line() + ggtitle("Proportation Enrolment Year in ART") + theme_bw()
+
+
+
+percentagetable
+agebar <- percentagetable[3:6,]
+agebar2 <- melt(agebar)
+ggplot(agebar2, aes(x=variable,y=value,group=Factor,fill=Factor))+xlab("Enrolment Year")+
+  ylab('Percentage')+geom_bar(stat = "identity")+theme_bw()+ggtitle('Age Categories by Enrolment Year')
+
+cd4bar <- percentagetable[16:19,]
+cd4bar2 <- melt(cd4bar)
+ggplot(cd4bar2, aes(x=variable,y=value,group=Factor,fill=Factor))+xlab("Enrolment Year")+
+  ylab('Percentage')+geom_bar(stat = "identity")+theme_bw()+ggtitle('CD4 Categories by Enrolment Year')
+
+whobar <- percentagetable[11:15,]
+whobar2 <- melt(whobar)
+ggplot(whobar2, aes(x=variable,y=value,group=Factor,fill=Factor))+xlab("Enrolment Year")+
+  ylab('Percentage')+geom_bar(stat = "identity")+theme_bw()+ggtitle('WHO Stage Categories by Enrolment Year')

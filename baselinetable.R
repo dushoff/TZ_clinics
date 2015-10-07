@@ -58,12 +58,27 @@ baseline_enrollment <- (rbind(
   ,baselinecat("Malnourished : Missing", Datetable$base_Malnourshed == "")
 ))
 
-
-percentagetable <- (baseline_enrollment %>% transmute(Factor = Factor,
-                                                     X2011 = 100*X2011/Total,
-                                                     X2012 = 100*X2012/Total,
-                                                     X2013 = 100*X2013/Total,
-                                                     X2014 = 100*X2014/Total))
+per <- function(x){
+  r <- nrow(x)
+  c <- ncol(x)
+  for(j in 1:c){
+    tempsum <- sum(x[,j])
+    for(i in 1:r){
+      x[i,j] <- x[i,j]/tempsum
+    }
+  }
+  return(x)
+}
+percentagetable <- baseline_enrollment
+percentagetable[1:2,2:6] <- per(baseline_enrollment[1:2,2:6])
+percentagetable[3:6,2:6] <- per(baseline_enrollment[3:6,2:6])
+percentagetable[7:10,2:6] <- per(baseline_enrollment[7:10,2:6])
+percentagetable[11:15,2:6] <- per(baseline_enrollment[11:15,2:6])
+percentagetable[16:19,2:6] <- per(baseline_enrollment[16:19,2:6])
+percentagetable[20:24,2:6] <- per(baseline_enrollment[20:24,2:6])
+percentagetable[25:29,2:6] <- per(baseline_enrollment[25:29,2:6])
+percentagetable[30:32,2:6] <- per(baseline_enrollment[30:32,2:6])
+percentagetable[33:37,2:6] <- per(baseline_enrollment[33:37,2:6])
 
 
 ARTeligi <- function(cat,logic){
