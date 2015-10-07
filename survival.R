@@ -2,7 +2,8 @@
 library(dplyr)
 library(survival)
 
-TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 182.625))
+TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1))
+                                  
 
 
 ##first do table 3 from Joseph's docx
@@ -55,17 +56,12 @@ plot(SurARV_whostage , col=c(1:4),xlab = "Time", ylab = "Survival Probability", 
 legend('topright',c("1","2","3","4"),col=c("black","red","green","blue"),lty=1)
 
 
-mod <- coxph(Surv(as.numeric(arv_date)-as.numeric(startdate),!is.na(arv_date))~age + start_year,data=TZsurdat)
-summary(mod)
+mod <- survfit(Surv(as.numeric(TZsurdat$lastVisit)-as.numeric(TZsurdat$startdate),
+                    TZsurdat$death == "No" & !is.na(TZsurdat$LTFU_status) & TZsurdat$LTFU_status == FALSE) ~1)
+plot(mod)
+mod2 <- survfit(Surv(as.numeric(TZsurdat$arv_date)-as.numeric(TZsurdat$startdate), !is.na(TZsurdat$arv_date))~1)
+mod2
+art <- data.frame(time= mod2$time, treated = mod2$n.event/29531)
 
+lines(art$time,cumsum(art$treated),lty=1)
 
-
-art <- TZsurdat %>% filter(!is.na(arv_date))
-noart <- TZsurdat %>% filter(is.na(arv_date))
-
-modart <- survfit(Surv(as.numeric(arv_date)-as.numeric(startdate), !is.na(arv_date))~1, data=art)
-modnoart <- survfit(Surv(as.numeric(LTFU_date)-as.numeric(firstVisit), !is.na(LTFU_date))~1, data=noart)
-
-plot(modart,col=1, xlab = "Time", ylab="Cumulative Survival Probability",lty=1,fun=function(x) { 1- x }, main="ART VS LTFU IF NO ART")  
-lines(modnoart,col=2,lty=1,fun=function(x) { 1- x })
-legend('bottomright',c("ART","LTFU IF NO ART"),col=c("black","red"),lty=1)
