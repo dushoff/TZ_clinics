@@ -37,6 +37,7 @@ eligible.%.Rout: keep.%.Rout eligible.R
 
 Sources += firstdate.R
 firstdate.visits.Rout: firstdate.R
+firstdate.sample.Rout: firstdate.R
 firstdate.%.Rout: eligible.%.Rout firstdate.R
 	$(run-R)
 
@@ -50,6 +51,7 @@ baselinetable.%.Rout: firstdate.%.Rout baselinetable.R
 
 Sources += survival.R
 survival.visits.Rout: survival.R
+survival.sample.Rout: survival.R
 survival.%.Rout: baselinetable.%.Rout survival.R
 	$(run-R)
 
