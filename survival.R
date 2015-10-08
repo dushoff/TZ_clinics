@@ -4,49 +4,40 @@ library(survival)
 library(reshape2)
 library(ggplot2)
 
+###Need to clean up
 TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1,
                                   templast= ifelse(FUDate<endDate,lastVisit,endDate),
                                   lastdate = ifelse(is.na(arv_date),templast,arv_date)))
 
-
-##first do table 3 from Joseph's docx
-
-ARTeligi <- function(cat,logic){
-  data.frame(Factor = cat,
-             "<2" = nrow(subset(TZsurdat,logic & TZsurdat$age < 1)),
-             "2-5" = nrow(subset(TZsurdat,logic & TZsurdat$age >= 2 & TZsurdat$age <= 5)),
-             "6-9" = nrow(subset(TZsurdat,logic & TZsurdat$age >= 6 & TZsurdat$age <= 9)),
-             "10-14" = nrow(subset(TZsurdat,logic & TZsurdat$age >= 10 & TZsurdat$age <= 14)),
-             Total = nrow(subset(TZsurdat,logic)))
-  
-}
-
-time_ARTenrolment <- (rbind(
-  ARTeligi("Enrolment", !is.na(TZsurdat$arv_date))
-  ,ARTeligi("Within 1 month",(as.numeric(TZsurdat$arv_date)- as.numeric(TZsurdat$startdate)) <= 30)
-  ,ARTeligi("Within 2 month",(as.numeric(TZsurdat$arv_date)- as.numeric(TZsurdat$startdate)) <= 60)
-  ,ARTeligi("Within 3 month",(as.numeric(TZsurdat$arv_date)- as.numeric(TZsurdat$startdate)) <= 90)
-  ,ARTeligi("Within 6 month",(as.numeric(TZsurdat$arv_date)- as.numeric(TZsurdat$startdate)) <= 180)
-  ,ARTeligi("Within 12 month",(as.numeric(TZsurdat$arv_date)- as.numeric(TZsurdat$startdate)) <= 365)
-  ,ARTeligi("> 12 month",(as.numeric(TZsurdat$arv_date)- as.numeric(TZsurdat$startdate)) > 365)
-  ,ARTeligi("Not yet started", is.na(TZsurdat$arv_date))
-))
-time_ARTenrolment
-
 artmod <- survfit(Surv(lastdate - as.numeric(startdate), !is.na(arv_date)) ~ 1,data=TZsurdat)
 artmod
 
+art <- data.frame(time=artmod$time, n = artmod$n, event= artmod$n.event)
+art <- art %>% mutate(prob = event/n,
+                      cumprob = cumsum(prob))
+
+#ggplot(art,aes(time/365.25,cumprob)) + geom_line() + theme_bw() +
+#  ggtitle("Cumulative Probability of ART Start") + xlab("Follow-up Time in Years") + ylab("Probability") 
 
 #plot(artmod,xlab = "Time", ylab = "Survival Probability", main = "Survival of ART")
-plot(artmod,fun=function(x)(1-x), xlab = "Time", ylab = "Probability", main = "Cumulative Probability")
+#only want cumulative plot
+plot(artmod,fun=function(x)(1-x), xlab = "Time", ylab = "Probability", main = "Cumulative Probability of ART Start")
 
-plot(cumsum(artmod$n.event/artmod$n),x=artmod$time/365.25, xlab="Follow-up Time in Years",
-     ylab="Probability", main="Cumulative Probability of Follow-up ")
+artyearmod <- update(artmod,.~start_year)
+#plot(artyearmod,fun=function(x)(1-x), xlab = "Time", 
+#     ylab = "Probability", main = "Cumulative Probability By Enrolment Year", col=1:4,mark.time = FALSE)
+#legend('bottomright', c('2011','2012','2013','2014'),col=c("black","red","green","blue"),lty=1)
 
-artyear <- update(artmod,.~start_year)
-plot(artyear,fun=function(x)(1-x), xlab = "Time", 
-     ylab = "Probability", main = "Cumulative Probability By Enrolment Year", col=1:4,mark.time = FALSE)
-legend('bottomright', c('2011','2012','2013','2014'),col=c("black","red","green","blue"),lty=1)
+artyearsum <- summary(artyearmod)
+
+artyear <- data.frame(time=artyearsum$time,
+                      year= artyearsum$strata,
+                      n.risk = artyearsum$n.risk,
+                      event = artyearsum$n.event,
+                      surv = artyearsum$surv)
+
+ggplot(artyear, aes(time/365.25, 1 - surv, group=year, colour=year )) + geom_line() + theme_bw()+
+  ggtitle('Cumulative Probability of ART Start by Enrolment Year') + xlab("Follow-up in Years") + ylab("Probability")
 
 SurvEnrol <- survfit(Surv(templast - as.numeric(startdate), templast >= endDate) ~ 1,data=TZsurdat)
 plot(SurvEnrol, conf.int=FALSE, xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")

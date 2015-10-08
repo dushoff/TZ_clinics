@@ -102,4 +102,16 @@ ARTEligibility <- (rbind(
 
 ARTEligibility
   
-###Last table use survival data ... 
+
+time_ARTenrolment <- (rbind(
+  ARTeligi("Enrolment", !is.na(Datetable$arv_date))
+  ,ARTeligi("Within 1 month",(as.numeric(Datetable$arv_date)- as.numeric(Datetable$startdate)) <= 30)
+  ,ARTeligi("Within 2 month",(as.numeric(Datetable$arv_date)- as.numeric(Datetable$startdate)) <= 60)
+  ,ARTeligi("Within 3 month",(as.numeric(Datetable$arv_date)- as.numeric(Datetable$startdate)) <= 90)
+  ,ARTeligi("Within 6 month",(as.numeric(Datetable$arv_date)- as.numeric(Datetable$startdate)) <= 180)
+  ,ARTeligi("Within 12 month",(as.numeric(Datetable$arv_date)- as.numeric(Datetable$startdate)) <= 365)
+  ,ARTeligi("> 12 month",(as.numeric(Datetable$arv_date)- as.numeric(Datetable$startdate)) > 365)
+  ,ARTeligi("Not yet started", is.na(Datetable$arv_date))
+))
+
+time_ARTenrolment

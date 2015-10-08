@@ -21,6 +21,7 @@ keep.visits.Rout: children_visits.RData keep.R
 	$(run-R)
 
 ### What do the cd4 data look like?
+### Mike: Do we still need this?
 Sources += cd4look.R
 cd4look.visits.Rout: cd4look.R
 cd4look.%.Rout: keep.%.Rout cd4look.R
@@ -33,7 +34,7 @@ eligible.%.Rout: keep.%.Rout eligible.R
 	$(run-R)
 
 ### Make a patient data frame with first dates for:
-###### enrolment, eligibility, cd4, ARV
+###### enrolment, eligibility, cd4, ARV, and baselines 
 
 Sources += firstdate.R
 firstdate.visits.Rout: firstdate.R
@@ -42,6 +43,7 @@ firstdate.%.Rout: eligible.%.Rout firstdate.R
 	$(run-R)
 
 #### Tables of Baselines and starting
+#### Summary tables
 
 Sources += baselinetable.R
 baselinetable.%.Rout: firstdate.%.Rout baselinetable.R

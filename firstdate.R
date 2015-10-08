@@ -51,7 +51,7 @@ Datetable <- (summarise(group_by(eligible, patientid)
 		arvstatuscode == "Start ARV"  & !is.na(arvstatuscode)))
 	, base_cd4 = baseline(subset(cd4,!is.na(cd4)))
   , base_whostage = baseline(whostage)
-  , base_eligible = eligible[1]
+  , base_eligible = eligible[1] ## First eligibility status
   , base_facility = baseline(hf_type)
   , base_referred = baseline(referredfromid)
   , base_TB = baseline(tbscreeningid)
