@@ -4,139 +4,99 @@ library(survival)
 library(reshape2)
 library(ggplot2)
 
-###Need to clean up
-TZsurdat <- (Datetable %>% mutate(startdate = firstVisit - 1,
+
+TZsurdat <- (Datetable %>% mutate(startdate = as.numeric(firstVisit - 1),
                                   templast= ifelse(FUDate<endDate,lastVisit,endDate),
                                   lastdate = ifelse(is.na(arv_date),templast,arv_date)))
 
-artmod <- survfit(Surv(lastdate - as.numeric(startdate), !is.na(arv_date)) ~ 1,data=TZsurdat)
-artmod
+## We want avoid using survival objects for now until we actually need the analysis (coxs ph)
+## For now, only use it for collaping data and extracting info back to dataframe
+artsur <- survfit(Surv(lastdate - startdate, !is.na(arv_date)) ~ 1 ,data=TZsurdat)
+artsur
 
-art <- data.frame(time=artmod$time, n = artmod$n, event= artmod$n.event)
-art <- art %>% mutate(prob = event/n,
-                      cumprob = cumsum(prob))
+print(sum(artsur$n.event)/artsur$n)
 
-#ggplot(art,aes(time/365.25,cumprob)) + geom_line() + theme_bw() +
-#  ggtitle("Cumulative Probability of ART Start") + xlab("Follow-up Time in Years") + ylab("Probability") 
+art <- data.frame(time=artsur$time, n = artsur$n, artcount= artsur$n.event)
+art <- art %>% mutate(prob = artcount/n,
+                      cumprob = cumsum(prob),
+                      followUp = time/year)
 
-#plot(artmod,xlab = "Time", ylab = "Survival Probability", main = "Survival of ART")
-#only want cumulative plot
-plot(artmod,fun=function(x)(1-x), xlab = "Time", ylab = "Probability", main = "Cumulative Probability of ART Start")
+### This is the cumulative probability plot of Enrolling in ART out of the population  
+ggplot(art, aes(followUp,cumprob)) + geom_line() + theme_bw()
+
+
+### Linked and Alive... This inlcudes enrolling in ART OR not ART but not LTFU
+### Because if we just do LTFU, we have ART treated patients that are not coming in anymore 
+linkedsur <- survfit(Surv(templast - startdate, (templast >= endDate) | !is.na(arv_date))~1,data=TZsurdat)
+linkedsur
+
+print(sum(linkedsur$n.event)/linkedsur$n)
+
+linked <- data.frame(time=linkedsur$time, n= linkedsur$n, linkedcount= linkedsur$n.event)
+linked <- linked %>% mutate(prob = linkedcount/n,
+                      cumprob = cumsum(prob),
+                      followUp = time/year)
+
+ggplot(linked, aes(followUp,cumprob)) + geom_line() + theme_bw()
+
+###Now looking at year of ART enrolment
 
 artyearmod <- update(artmod,.~start_year)
-#plot(artyearmod,fun=function(x)(1-x), xlab = "Time", 
-#     ylab = "Probability", main = "Cumulative Probability By Enrolment Year", col=1:4,mark.time = FALSE)
-#legend('bottomright', c('2011','2012','2013','2014'),col=c("black","red","green","blue"),lty=1)
-
 artyearsum <- summary(artyearmod)
 
 artyear <- data.frame(time=artyearsum$time,
-                      year= artyearsum$strata,
-                      n.risk = artyearsum$n.risk,
-                      event = artyearsum$n.event,
-                      surv = artyearsum$surv)
+                      Year= artyearsum$strata,
+                      yearcount = artyearsum$n.event,
+                      n = sum(artyearmod$n),
+                      nart = sum(artyearmod$n.event))
 
-ggplot(artyear, aes(time/365.25, 1 - surv, group=year, colour=year )) + geom_line() + theme_bw()+
-  ggtitle('Cumulative Probability of ART Start by Enrolment Year') + xlab("Follow-up in Years") + ylab("Probability")
+artyear <- artyear %>% group_by(Year) %>%  mutate(probpop = yearcount/n,
+                                                  probart = yearcount/nart,
+                              cumprobpop = cumsum(probpop),
+                              cumprobart = cumsum(probart),
+                              followUp = time/year)
+
+ggplot(artyear, aes(followUp, cumprobpop, group=Year, colour=Year )) + geom_line() + theme_bw()+
+  ggtitle('Cumulative Probability of ART Start by Enrolment Year (POPULATION)') + xlab("Follow-up in Years") + ylab("Probability")
+
+ggplot(artyear, aes(followUp, cumprobart, group=Year, colour=Year )) + geom_line() + theme_bw()+
+  ggtitle('Cumulative Probability of ART Start by Enrolment Year (ART)') + xlab("Follow-up in Years") + ylab("Probability")
+
+
+linkedyearsur <- update(linkedsur,.~start_year)
+linkedyearsum <- summary(linkedyearsur)
+
+linkedyear <- data.frame(time=linkedyearsum$time,
+                      Year= linkedyearsum$strata,
+                      yearcount = linkedyearsum$n.event,
+                      n = sum(linkedyearsur$n),
+                      nlinked = sum(linkedyearsur$n.event))
+
+linkedyear <- linkedyear %>% group_by(Year) %>%  mutate(probpop = yearcount/n,
+                                                  problinked = yearcount/nlinked,
+                                                  cumprobpop = cumsum(probpop),
+                                                  cumproblinked = cumsum(problinked),
+                                                  followUp = time/year)
+
+ggplot(linkedyear, aes(followUp, cumprobpop, group=Year, colour=Year )) + geom_line() + theme_bw()+
+  ggtitle('Cumulative Probability of Linked by Enrolment Year (POPULATION)') + xlab("Follow-up in Years") + ylab("Probability")
+
+ggplot(linkedyear, aes(followUp, cumproblinked, group=Year, colour=Year )) + geom_line() + theme_bw()+
+  ggtitle('Cumulative Probability of Linked by Enrolment Year (Linked)') + xlab("Follow-up in Years") + ylab("Probability")
+
+
+testing <- merge(art,artyear, by="time")
+head(testing)
+testing <- testing %>% group_by(year) %>% 
+  mutate(ratio = event.per.year/event,
+         cumratio = cumsum(event.per.year)/cumsum(event))
+
+head(testing)
+
+ggplot(testing, aes(time, cumratio, group=year,colour=year)) + geom_line() + theme_bw()
+##Linked and Alive
 
 SurvEnrol <- survfit(Surv(templast - as.numeric(startdate), templast >= endDate) ~ 1,data=TZsurdat)
 plot(SurvEnrol, conf.int=FALSE, xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
 
-# art <- data.frame(time= artmod$time, treated = artmod$n.event)
-# art <- art %>% mutate(cumprob = cumsum(treated))
-# 
-# 
-# print(ggplot(art,aes(x=time,y=cumprob)) +xlab("Time") + ylab("Cumulative Probability") +
-#   geom_line() + ggtitle("Proportion of ART") + theme_bw()
-# )
-# 
-# artagemod <- update(artmod,.~+TZsurdat$age)
-# artage <- data.frame(time=artagemod$time, treated = artagemod$n.event/artmod$n, age=0)
-# 
-# artage$age[1:cumsum(artagemod$strata)[15]] <- 14 
-# artage$age[1:cumsum(artagemod$strata)[14]] <- 13 
-# artage$age[1:cumsum(artagemod$strata)[13]] <- 12 
-# artage$age[1:cumsum(artagemod$strata)[12]] <- 11 
-# artage$age[1:cumsum(artagemod$strata)[11]] <- 10 
-# artage$age[1:cumsum(artagemod$strata)[10]] <- 9 
-# artage$age[1:cumsum(artagemod$strata)[9]] <- 8
-# artage$age[1:cumsum(artagemod$strata)[8]] <- 7
-# artage$age[1:cumsum(artagemod$strata)[7]] <- 6
-# artage$age[1:cumsum(artagemod$strata)[6]] <- 5
-# artage$age[1:cumsum(artagemod$strata)[5]] <- 4
-# artage$age[1:cumsum(artagemod$strata)[4]] <- 3
-# artage$age[1:cumsum(artagemod$strata)[3]] <- 2
-# artage$age[1:cumsum(artagemod$strata)[2]] <- 1
-# artage$age[1:cumsum(artagemod$strata)[1]] <- 0
-# 
-# artage <- (artage
-# 	%>% group_by(age)
-# 	%>% mutate(cumprob = cumsum(treated))
-# )
-# 
-# ggplot(artage,aes(x=time,y=cumprob,group=age,col=factor(age))) +xlab("Time") + ylab("Cumulative Probability") +
-#   geom_line() + ggtitle("Proportion of ART by age") + theme_bw()
-# 
-# artwhomod <- update(artmod,.~+TZsurdat$base_whostage)
-# artwho <- data.frame(time=artwhomod$time, treated = artwhomod$n.event/artmod$n, WHOstage=0)
-# 
-# artwho$WHOstage[1:cumsum(artwhomod$strata)[4]] <- 4 
-# artwho$WHOstage[1:cumsum(artwhomod$strata)[3]] <- 3  
-# artwho$WHOstage[1:cumsum(artwhomod$strata)[2]] <- 2  
-# artwho$WHOstage[1:cumsum(artwhomod$strata)[1]] <- 1 
-# 
-# artwho <- artwho %>% group_by(WHOstage) %>% mutate(cumprob = cumsum(treated))
-# 
-# ggplot(artwho,aes(x=time,y=cumprob,group=WHOstage,col=factor(WHOstage))) +xlab("Time") + ylab("Cumulative Probability") +
-#   geom_line() + ggtitle("Proportion WHO stage in ART") + theme_bw()
-# 
-# 
-# arthfmod <- update(artmod,.~+TZsurdat$base_facility)
-# arthf <- data.frame(time=arthfmod$time, treated = arthfmod$n.event/artmod$n, HF=0)
-# arthfmod$strata
-# 
-# arthf$HF[1:cumsum(arthfmod$strata)[4]] <- "Other" 
-# arthf$HF[1:cumsum(arthfmod$strata)[3]] <- "Hospital"  
-# arthf$HF[1:cumsum(arthfmod$strata)[2]] <- "Health Centre"  
-# arthf$HF[1:cumsum(arthfmod$strata)[1]] <- "Dispensary" 
-# 
-# arthf <- arthf %>% group_by(HF) %>% mutate(cumprob = cumsum(treated))
-# 
-# print(ggplot(arthf
-# 	, aes(x=time,y=cumprob,group=HF,col=factor(HF))) 
-# 	+xlab("Time") 
-# 	+ ylab("Cumulative Probability") 
-# 	+ geom_line() 
-# 	+ ggtitle("Proportion HF in ART") 
-# 	+ theme_bw()
-# )
-# 
-# artyearmod <- update(artmod,.~+TZsurdat$start_year)
-# artyear <- data.frame(time=artyearmod$time, treated = artyearmod$n.event/artmod$n, year=0)
-# artyearmod$strata
-# 
-# artyear$year[1:cumsum(artyearmod$strata)[4]] <- 2014 
-# artyear$year[1:cumsum(artyearmod$strata)[3]] <- 2013 
-# artyear$year[1:cumsum(artyearmod$strata)[2]] <- 2012  
-# artyear$year[1:cumsum(artyearmod$strata)[1]] <- 2011 
-# 
-# artyear <- artyear %>% group_by(year) %>% mutate(cumprob = cumsum(treated))
-# 
-# ggplot(artyear,aes(x=time,y=cumprob,group=year,col=factor(year))) +xlab("Time") + ylab("Cumulative Probability") +
-#   geom_line() + ggtitle("Proportion Enrolment Year in ART") + theme_bw()
-# 
-# print(percentagetable)
-# agebar <- percentagetable[3:6,]
-# agebar2 <- melt(agebar)
-# ggplot(agebar2, aes(x=variable,y=value,group=Factor,fill=Factor))+xlab("Enrolment Year")+
-#   ylab('Percentage')+geom_bar(stat = "identity")+theme_bw()+ggtitle('Age Categories by Enrolment Year')
-# 
-# cd4bar <- percentagetable[16:19,]
-# cd4bar2 <- melt(cd4bar)
-# ggplot(cd4bar2, aes(x=variable,y=value,group=Factor,fill=Factor))+xlab("Enrolment Year")+
-#   ylab('Percentage')+geom_bar(stat = "identity")+theme_bw()+ggtitle('CD4 Categories by Enrolment Year')
-# 
-# whobar <- percentagetable[11:15,]
-# whobar2 <- melt(whobar)
-# ggplot(whobar2, aes(x=variable,y=value,group=Factor,fill=Factor))+xlab("Enrolment Year")+
-#   ylab('Percentage')+geom_bar(stat = "identity")+theme_bw()+ggtitle('WHO Stage Categories by Enrolment Year')
+artyearmod
