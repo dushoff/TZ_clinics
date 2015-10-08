@@ -31,8 +31,6 @@ dateYear <- function(date){
   return(as.numeric(format(date,"%Y")))
 }
 
-eligible$MED <- unclass(eligible$medication2)
-
 
 ##summarise will not include the other columns in eligible.RData
 ##combining baselines 
