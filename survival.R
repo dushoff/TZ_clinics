@@ -36,8 +36,12 @@ time_ARTenrolment
 artmod <- survfit(Surv(lastdate - as.numeric(startdate), !is.na(arv_date)) ~ 1,data=TZsurdat)
 artmod
 
+
 #plot(artmod,xlab = "Time", ylab = "Survival Probability", main = "Survival of ART")
 plot(artmod,fun=function(x)(1-x), xlab = "Time", ylab = "Probability", main = "Cumulative Probability")
+
+plot(cumsum(artmod$n.event/artmod$n),x=artmod$time/365.25, xlab="Follow-up Time in Years",
+     ylab="Probability", main="Cumulative Probability of Follow-up ")
 
 artyear <- update(artmod,.~start_year)
 plot(artyear,fun=function(x)(1-x), xlab = "Time", 
@@ -47,32 +51,6 @@ legend('bottomright', c('2011','2012','2013','2014'),col=c("black","red","green"
 SurvEnrol <- survfit(Surv(templast - as.numeric(startdate), templast >= endDate) ~ 1,data=TZsurdat)
 plot(SurvEnrol, conf.int=FALSE, xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
 
-# plot(SurvEnrol, xlim= c(500,1000),xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
-# plot(SurvEnrol, xlim= c(1,10),xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
-# plot(SurvEnrol, mark.time=FALSE, conf.int = FALSE,xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
-# 
-# artmod <- survfit(Surv(as.numeric(TZsurdat$arv_date)-as.numeric(TZsurdat$startdate), !is.na(TZsurdat$arv_date))~1)
-# art2mod <- survfit(Surv(time,!is.na(arv_date))~1,data=TZsurdat)
-# 
-# modxx <- survfit(Surv(time3,FUDate >= endDate)~1, data=TZsurdat)
-# modxx
-# plot(modxx)
-# artxx <- survfit(Surv(time3,!is.na(arv_date))~1, data=TZsurdat)
-# artxx
-# 
-# ## what we want
-# artx <- survfit(Surv(time4, !is.na(arv_date))~1,data=TZsurdat)
-# artx
-# plot(artx)
-# plot(artx,fun=function(x)(1-x))
-# 
-# artxsex <- update(artx,.~sex)
-# artxsex
-# plot(artxsex,col=1:2)
-# plot(artxsex,fun=function(x)(1-x),col=1:2)
-# 
-# ## what we want
-# 
 # art <- data.frame(time= artmod$time, treated = artmod$n.event)
 # art <- art %>% mutate(cumprob = cumsum(treated))
 # 
