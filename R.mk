@@ -20,13 +20,6 @@ keep.sample.Rout: sample.Rout keep.R
 keep.visits.Rout: children_visits.RData keep.R
 	$(run-R)
 
-### What do the cd4 data look like?
-### Mike: Do we still need this?
-Sources += cd4look.R
-cd4look.visits.Rout: cd4look.R
-cd4look.%.Rout: keep.%.Rout cd4look.R
-	$(run-R)
-
 ### Eligibility logic
 Sources += eligible.R
 eligible.visits.Rout: eligible.R
