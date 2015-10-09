@@ -44,14 +44,6 @@ baseline_delay <- function(cat, visits,logic=NULL){
 	return(visits[obsl][[1]] - visits[[1]])
 }
 
-
-baseline_delay <- function(cat, visits){
-  obsl <- !is.na(cat)
-  if(length(obsl)==0) return(NA)
-  return(visits[obsl][[1]] - visits[[1]])
-}
-
-
 ##summarise will not include the other columns in eligible.RData
 ##Now we should create a Datetable AND a Baselinetable and merge at the end by patientid 
 
