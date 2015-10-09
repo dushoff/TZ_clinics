@@ -76,5 +76,5 @@ patientTable <- (Dates
 	%>% full_join(StatusDelay)
 )
 
-# rdsave(patientTable)
+# rdsave(patientTable, endDate, year)
 

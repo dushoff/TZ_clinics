@@ -48,6 +48,6 @@ baselinetable.%.Rout: patientTable.%.Rout baselinetable.R
 Sources += survival.R
 survival.visits.Rout: survival.R
 survival.sample.Rout: survival.R
-survival.%.Rout: baselinetable.%.Rout survival.R
+survival.%.Rout: patientTable.%.Rout survival.R
 	$(run-R)
 
