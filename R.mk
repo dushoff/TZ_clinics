@@ -39,6 +39,7 @@ firstdate.%.Rout: eligible.%.Rout firstdate.R
 #### Summary tables
 
 Sources += baselinetable.R
+baselinetable.sample.Rout: baselinetable.R
 baselinetable.%.Rout: firstdate.%.Rout baselinetable.R
 	$(run-R)
 
