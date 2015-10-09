@@ -1,3 +1,5 @@
+## We need to onfirm that table is sorted by both visit number and visit date!
+
 library(dplyr)
 
 endDate <- as.Date("2014-12-31")
@@ -37,9 +39,8 @@ baseline <- function(cat){
 	return(obs[[1]])
 }
 
-baseline_delay <- function(cat, visits,logic=NULL){
-	obsl <- !is.na(cat)
-  if(!is.null(logic))(obsl <- !is.na(cat) & logic)
+delay <- function(cat, visits,logic=TRUE){
+	obsl <- !is.na(cat) & logic
 	if(sum(obsl)==0) return(NA)
 	return(visits[obsl][[1]] - visits[[1]])
 }
@@ -49,26 +50,31 @@ baseline_delay <- function(cat, visits,logic=NULL){
 
 patientdat <- eligible %>% group_by(patientid)
 
-Date_table <- (patientdat %>%
-                 summarise_each(funs(minDate,maxDate,followUp,
-                                     LTFU_status = followUp < endDate),visitdate)
-               )
-
-First_table <- (patientdat %>%
-                  summarise_each(funs(first), 
-                                 c(age,sex,death,eligible,whostage)
-                                 )
-                )
-
-Baseline_table <- (patientdat %>%
-                     summarise_each(funs(baseline),
-                      c(cd4,hf_type,referredfromid,tbscreeningid,nutritionalstatusid)
-                     )
+Dates <- (patientdat %>%
+	summarise_each(funs(
+			minDate, maxDate, followUp, LTFU_status = followUp < endDate
+	) , visitdate)
 )
-                
-Baseline_delay <- patientdat  %>%
-  summarise_each(funs(baseline_delay(eligible,visitdate,eligible==TRUE),
-                      baseline_delay(cd4,visitdate,cd4>0),
-                      baseline_delay(arvstatuscode, visitdate,arvstatuscode == "Start ARV"))
-  )
+
+Vars <- (patientdat %>%
+	summarise_each(funs(first, baseline, 
+		delay(., visitdate)
+	))
+)
+
+StatusDelay <- (patientdat  %>%
+	summarise_each(funs(
+		eligible_status_delay = delay(eligible,
+			., eligible==TRUE),
+		arv_status_delay = delay(arvstatuscode,
+			., arvstatuscode == "Start ARV")
+	), visitdate)
+)
+
+patient <- (Dates
+	%>% full_join(Vars)
+	%>% full_join(StatusDelay)
+)
+
+# rdsave(patient)
 
