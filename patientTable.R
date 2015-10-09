@@ -71,10 +71,10 @@ StatusDelay <- (patientdat  %>%
 	), visitdate)
 )
 
-patient <- (Dates
+patientTable <- (Dates
 	%>% full_join(Vars)
 	%>% full_join(StatusDelay)
 )
 
-# rdsave(patient)
+# rdsave(patientTable)
 

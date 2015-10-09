@@ -29,10 +29,10 @@ eligible.%.Rout: keep.%.Rout eligible.R
 ### Make a patient data frame with first dates for:
 ###### enrolment, eligibility, cd4, ARV, and baselines 
 
-Sources += firstdate.R
-firstdate.visits.Rout: firstdate.R
-firstdate.sample.Rout: firstdate.R
-firstdate.%.Rout: eligible.%.Rout firstdate.R
+Sources += patientTable.R
+patientTable.visits.Rout: patientTable.R
+patientTable.sample.Rout: patientTable.R
+patientTable.%.Rout: eligible.%.Rout patientTable.R
 	$(run-R)
 
 #### Tables of Baselines and starting
@@ -40,7 +40,7 @@ firstdate.%.Rout: eligible.%.Rout firstdate.R
 
 Sources += baselinetable.R
 baselinetable.sample.Rout: baselinetable.R
-baselinetable.%.Rout: firstdate.%.Rout baselinetable.R
+baselinetable.%.Rout: patientTable.%.Rout baselinetable.R
 	$(run-R)
 
 #### Survival stuff
