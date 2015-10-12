@@ -40,7 +40,7 @@ Sources += Eligibility.mkd
 
 ### Makestuff
 
-Makefile: wrapR.makestuff
+Makefile: smallR.makestuff
 
 repo = https://github.com/dushoff
 %.makestuff:
