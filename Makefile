@@ -6,7 +6,10 @@ target pngtarget pdftarget vtarget acrtarget: survival.sample.Rout
 ##################################################################
 
 ms = ../makestuff
+msrepo = https://github.com/dushoff
+
 -include $(ms)/git.def
+-include ../local/local.mk
 
 test:
 	echo $(parallel)
@@ -44,12 +47,11 @@ Sources += Eligibility.mkd
 
 Makefile: libR.makestuff
 
-repo = https://github.com/dushoff
 %.makestuff:
 	-cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
-	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
-	-cd $(dir $(ms)) && rm -rf $(ms) .$(notdir $(ms))
+	cd $(dir $(ms)) && git clone $(msrepo)/$(notdir $(ms)).git
+	-cd $(dir $(ms)) && rm -rf .$(notdir $(ms))
 	touch $@
 
 $(ms): 
-	cd $(dir $(ms)) && git clone $(repo)/$(notdir $(ms)).git
+	cd $(dir $(ms)) && git clone $(msrepo)/$(notdir $(ms)).git

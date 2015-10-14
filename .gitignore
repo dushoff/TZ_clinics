@@ -23,3 +23,5 @@ subclone_dir/
 testdir/
 
 compiler.mk
+
+*.makestuff
