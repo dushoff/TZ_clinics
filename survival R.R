@@ -1,5 +1,0 @@
-load('c_visits.RData')
-source('eligible.R')
-source('firstdate.R')
-source('baselinetable.R')
-source('survival.R')

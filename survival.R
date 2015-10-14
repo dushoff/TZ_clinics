@@ -1,11 +1,7 @@
 ## Compare arv_ever to arvstatuscode_first!
 
 ###Survival Analysis
-library(dplyr)
 library(survival)
-library(reshape2)
-library(ggplot2)
-theme_set(theme_bw())
 
 survTable <- (patientTable %>% 
 	mutate(e_diff= eligible_delay + 1

@@ -22,8 +22,8 @@ keep.visits.Rout: children_visits.RData keep.R
 
 ### Eligibility logic
 Sources += eligible.R
-eligible.visits.Rout: eligible.R
-eligible.%.Rout: keep.%.Rout eligible.R
+eligible.sample.Rout: eligible.R
+eligible.%.Rout: keep.%.Rout dplyr.Rlib.R eligible.R
 	$(run-R)
 
 ### Make a patient data frame with first dates for:
@@ -45,9 +45,9 @@ baselinetable.%.Rout: patientTable.%.Rout baselinetable.R
 
 #### Survival stuff
 
-Sources += survival.R
+Sources += survival.R rgb.R
 survival.visits.Rout: survival.R
 survival.sample.Rout: survival.R
-survival.%.Rout: patientTable.%.Rout survival.R
+survival.%.Rout: patientTable.%.Rout dplyr.Rlib.R rgb.R survival.R
 	$(run-R)
 

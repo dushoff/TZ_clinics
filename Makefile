@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: survival.visits.Rout 
+target pngtarget pdftarget vtarget acrtarget: survival.sample.Rout 
 
 ##################################################################
 
@@ -10,6 +10,8 @@ ms = ../makestuff
 
 test:
 	echo $(parallel)
+
+parallel = makestuff
 
 tables.Rout: keep.visits.Rout tables.R
 
@@ -29,7 +31,7 @@ include R.mk
 
 Sources += Eligibility.mkd
 
--include $(ms)/local.mk
+-include ../local.mk
 -include local.mk
 -include $(ms)/git.mk
 
@@ -40,7 +42,7 @@ Sources += Eligibility.mkd
 
 ### Makestuff
 
-Makefile: smallR.makestuff
+Makefile: libR.makestuff
 
 repo = https://github.com/dushoff
 %.makestuff:
