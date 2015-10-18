@@ -1,5 +1,3 @@
-## We need to onfirm that table is sorted by both visit number and visit date!
-
 library(dplyr)
 
 endDate <- as.Date("2014-12-31")
@@ -27,6 +25,10 @@ dateYear <- function(date){
   return(as.numeric(format(date,"%Y")))
 }
 
+statusYear <- function(visits,delay){
+  return(as.numeric(format(min(visits)+delay,"%Y")))
+}
+
 first <- function(cat){
   return(cat[[1]])
 }
@@ -39,14 +41,18 @@ baseline <- function(cat){
 	return(obs[[1]])
 }
 
-delay <- function(cat, visits,logic=TRUE){
+delay_first <- function(cat, visits,logic=TRUE){
 	obsl <- !is.na(cat) & logic
 	if(sum(obsl)==0) return(NA)
 	return(visits[obsl][[1]] - visits[[1]])
 }
 
-##summarise will not include the other columns in eligible.RData
-##Now we should create a Datetable AND a Baselinetable and merge at the end by patientid 
+delay_birth <- function(cat, visits,birth,logic=TRUE){
+	obsl <- !is.na(cat) & logic
+	if(sum(obsl)==0) return(NA)
+	return(visits[obsl][[1]] - birth[[1]])
+}
+
 
 patientdat <- eligible %>% group_by(patientid)
 
@@ -58,16 +64,23 @@ Dates <- (patientdat %>%
 
 Vars <- (patientdat %>%
 	summarise_each(funs(first, baseline, 
-		delay(., visitdate)
+		delay_first(., visitdate),
+                delay_birth(.,visitdate,dateofbirth)
 	))
 )
 
 StatusDelay <- (patientdat  %>%
 	summarise_each(funs(
-		eligible_status_delay = delay(eligible,
+		eligible_status_delay = delay_first(eligible,
 			., eligible==TRUE),
-		arv_status_delay = delay(arvstatuscode,
-			., arvstatuscode == "Start ARV")
+		eligible_status_year = statusYear(.,eligible_status_delay),
+		arv_status_delay = delay_first(arvstatuscode,
+			., arvstatuscode == "Start ARV"),
+		arv_status_year = statusYear(.,arv_status_delay),
+    eligible_birth_delay = delay_birth(eligible,
+      .,dateofbirth, eligible==TRUE),
+    arv_birth_delay = delay_birth(arvstatuscode,
+      .,dateofbirth, arvstatuscode == "Start ARV")
 	), visitdate)
 )
 
