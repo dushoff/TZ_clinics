@@ -5,8 +5,9 @@ target pngtarget pdftarget vtarget acrtarget: survival.sample.Rout
 
 ##################################################################
 
-ms = ../makestuff
-msrepo = https://github.com/dushoff
+gitroot = ../
+-include local.mk
+-include $(gitroot)/local/local.mk
 
 -include $(ms)/git.def
 -include ../local/local.mk
@@ -34,8 +35,6 @@ include R.mk
 
 Sources += Eligibility.mkd
 
--include ../local.mk
--include local.mk
 -include $(ms)/git.mk
 
 -include $(ms)/visual.mk
