@@ -33,7 +33,7 @@ include R.mk
 
 ######################################################################
 
-Sources += Eligibility.mkd
+Sources += Eligibility.mkd notes.txt todo.mkd
 
 -include $(ms)/git.mk
 

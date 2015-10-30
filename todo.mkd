@@ -1,0 +1,63 @@
+Schedule
+========
+
+* Joseph presentation 3 November
+
+* Report to Gavin 14 December
+
+Tasks
+=====
+
+* JD report to Gavin on proposed schedule
+
+* JN check out Google hangouts
+
+* JN figure out schedule for ministry report
+
+* Make Excel tables for the ministry using R
+** JN will research and report
+
+* Extend the survival analysis
+
+Survival analysis
+=================
+
+* Start ART (positive outcome)
+** Since enrolment
+** Since eligibility
+** Since birth? Could be hard because of left censoring
+
+* Enrolment (positive outcome)
+** Since birth
+
+* Eligibility (positive outcome)
+** Since enrolment
+** Since birth
+
+* Loss or death (negative outcome)
+** Since enrolment
+** Since birth
+
+Treated people only
+-------------------
+
+* Fail or drop from first-line treatment
+
+* Fail or drop from treatment
+
+Covariates
+----------
+
+(Measured at enrolment. Any time-varying covariates?)
+
+* Geographic
+
+* Sex
+
+* Year
+
+* Age at enrolment
+
+* Weight and height?
+
+* CD4 
