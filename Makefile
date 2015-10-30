@@ -5,7 +5,7 @@ target pngtarget pdftarget vtarget acrtarget: survival.sample.Rout
 
 ##################################################################
 
-gitroot = ../
+gitroot = ..
 -include local.mk
 -include $(gitroot)/local/local.mk
 
@@ -45,6 +45,7 @@ Sources += Eligibility.mkd notes.txt todo.mkd
 ### Makestuff
 
 Makefile: libR.makestuff
+testfile: new.makestuff
 
 %.makestuff:
 	-cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
