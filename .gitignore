@@ -21,6 +21,7 @@ commit.txt
 
 subclone_dir/
 testdir/
+testdir_old/
 
 compiler.mk
 

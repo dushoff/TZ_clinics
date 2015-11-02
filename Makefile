@@ -5,17 +5,14 @@ target pngtarget pdftarget vtarget acrtarget: survival.sample.Rout
 
 ##################################################################
 
-gitroot = ..
+msrepo = https://github.com/dushoff
+
+gitroot = ../
 -include local.mk
 -include $(gitroot)/local/local.mk
+ms = $(gitroot)/makestuff
 
--include $(ms)/git.def
--include ../local/local.mk
-
-test:
-	echo $(parallel)
-
-parallel = makestuff
+##################################################################
 
 tables.Rout: keep.visits.Rout tables.R
 
@@ -38,7 +35,6 @@ Sources += Eligibility.mkd notes.txt todo.mkd
 -include $(ms)/git.mk
 
 -include $(ms)/visual.mk
-
 -include $(ms)/wrapR.mk
 # -include oldlatex.mk
 
