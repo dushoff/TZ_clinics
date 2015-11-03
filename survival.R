@@ -2,9 +2,10 @@
 
 ###Survival Analysis
 library(survival)
+library(dplyr)
 
 survTable <- (patientTable %>% 
-	mutate(e_diff= eligible_delay + 1
+	mutate(e_diff= eligible_status_delay + 1
 		, arv_ever = !is.na(arv_status_delay)
 		, arv_diff = arv_status_delay + 1
 		, lastdate = ifelse(LTFU_status, followUp, endDate)
