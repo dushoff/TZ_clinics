@@ -16,6 +16,7 @@ Tasks
 
 * Make Excel tables for the ministry using R
 ** JN will research and report
+** Mike will double check tables to make sure everything works
 
 * Extend the survival analysis
 
