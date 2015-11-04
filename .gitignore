@@ -2,6 +2,7 @@ commit.txt
 .*.sw*
 
 *.pdf
+*.csv
 
 *.log
 *.aux

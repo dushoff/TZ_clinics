@@ -38,9 +38,9 @@ patientTable.%.Rout: eligible.%.Rout patientTable.R
 #### Tables of Baselines and starting
 #### Summary tables
 
-Sources += baselinetable.R
-baselinetable.sample.Rout: baselinetable.R
-baselinetable.%.Rout: patientTable.%.Rout baselinetable.R
+Sources += baselinetables.R
+baselinetables.sample.Rout: baselinetables.R
+baselinetables.%.Rout: patientTable.%.Rout baselinetables.R
 	$(run-R)
 
 #### Survival stuff

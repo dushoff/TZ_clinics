@@ -22,7 +22,7 @@ followUp <- function(dates){
 
 dateYear <- function(date){
   if(length(date)==0) return((NA))
-  return(as.numeric(format(date,"%Y")))
+  return(as.numeric(format(min(date),"%Y")))
 }
 
 statusYear <- function(visits,delay){
@@ -65,12 +65,13 @@ Dates <- (patientdat %>%
 Vars <- (patientdat %>%
 	summarise_each(funs(first, baseline, 
 		delay_first(., visitdate),
-                delay_birth(.,visitdate,dateofbirth)
+    delay_birth(.,visitdate,dateofbirth)
 	))
 )
 
 StatusDelay <- (patientdat  %>%
 	summarise_each(funs(
+	  enrolled_year = dateYear,
 		eligible_status_delay = delay_first(eligible,
 			., eligible==TRUE),
 		eligible_status_year = statusYear(.,eligible_status_delay),
