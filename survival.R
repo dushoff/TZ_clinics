@@ -3,6 +3,7 @@
 ###Survival Analysis
 library(survival)
 library(dplyr)
+library(ggplot2)
 
 survTable <- (patientTable %>% 
 	mutate(e_diff= eligible_status_delay + 1
@@ -25,6 +26,7 @@ arvSurv <- survfit(Surv(
 )
 
 print(sum(arvSurv$n.event)/arvSurv$n)
+print(plot(arvSurv,mark.time=FALSE,main='ARV Ever Survival',xlab='day_lag'))
 
 arv <- data.frame(
 	time=arvSurv$time, 
@@ -41,7 +43,7 @@ arv <- arv %>% mutate(
 ### This is the cumulative probability plot of Enrolling in ART out of the population	
 print(ggplot(arv, aes(followUp,cumprob))
 	+ geom_line() 
-	+ ggtitle('Cumulative Probability of Enrolling in ART (POPULATION)')
+	+ ggtitle('Cumulative Probability of Enrolling in ART Ever (POPULATION)')
 )
 
 ### Linked and Alive... for this section we don't even care about ART
@@ -68,20 +70,53 @@ linked <- linked %>% mutate(
 	, followUp = time/year
 )
 
+print(plot(laSurv,mark.time=FALSE,main='Linked',xlab='Day Lag'))
+
+
 print(ggplot(linked, aes(followUp, survprob))
 	+ xlab("Follow-up years")
-	+ xlab("Survival")
+	+ ylab("Survival Probaiblity")
 	+ geom_line()
 	+ ggtitle('Survival while linked to care')
 	+ ylim(c(0, 1))
 )
 
-print(plot(laSurv))
-
 ### By enrolYear
 
 arvyearsur <- update(arvSurv, .~enrolYear)
-plot(arvyearsur, mark.time=FALSE)
+#plot(arvyearsur, mark.time=FALSE)
+
+##need to look at summary strata 
+
+arvyear <- with(arvyearsur,data.frame(
+  time=time, 
+  n = c(rep(n[1],strata[1]),
+        rep(n[2],strata[2]),
+        rep(n[3],strata[3]),
+        rep(n[4],strata[4]))
+        , 
+  yr = c(rep(2011,strata[1]),
+           rep(2012,strata[2]),
+           rep(2013,strata[3]),
+           rep(2014,strata[4])),
+  arvcount= n.event
+))
+
+arvyear <- arvyear %>% 
+  group_by(yr) %>%  
+    mutate(
+      prob = arvcount/500,
+      cumprob = cumsum(prob),
+      followUp = time/year
+)
+
+print(plot(arvyearsur,mark.time = FALSE,main='ARV Ever Survival by Year',xlab="day lag"))
+
+print(ggplot(arvyear, aes(followUp,cumprob,col=factor(yr),group=yr))
+      + geom_line() 
+      + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
+)
+
 
 linkedyearsur <- update(laSurv,.~enrolYear)
 plot(linkedyearsur, mark.time=FALSE)
