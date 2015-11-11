@@ -5,6 +5,34 @@ library(survival)
 library(dplyr)
 library(ggplot2)
 
+nstrata <- function(n,strata){
+  ntemp <- numeric(sum(strata))
+  temp <- numeric(length(strata)+1)
+  for(i in 1:length(strata)){
+    temp[i+1] <- strata[[i]]
+  }
+  temp <- cumsum(temp)
+  for(i in 1:length(strata)){
+    ntemp[(temp[i]+1):temp[i+1]] <- rep(n[i],strata[[i]])
+  }
+  return(ntemp)
+}
+catstrata <- function(strata){
+  temp <- numeric(length(strata)+1)
+  for(i in 1:length(strata)){
+    temp[i+1] <- strata[[i]]
+  }
+  ntemp <- numeric(sum(strata))
+  for(i in 1:length(strata)){
+    ntemp[(sum(temp[1:i])+1) : sum(temp[1:(i+1)])] <- 
+      rep(names(strata[i]),strata[i])
+  }
+  return(ntemp)
+}
+
+{
+total <- length(patientTable$patientid)
+
 survTable <- (patientTable %>% 
 	mutate(e_diff= eligible_status_delay + 1
 		, arv_ever = !is.na(arv_status_delay)
@@ -35,7 +63,7 @@ arv <- data.frame(
 )
 
 arv <- arv %>% mutate(
-	prob = arvcount/n,
+	prob = arvcount/total,
 	cumprob = cumsum(prob),
 	followUp = time/year
 )
@@ -64,7 +92,7 @@ linked <- data.frame(
 )
 
 linked <- linked %>% mutate(
-	prob = linkedcount/n
+	prob = linkedcount/total
 	, cumprob = cumsum(prob)
 	, survprob = 1-cumsum(prob)
 	, followUp = time/year
@@ -87,25 +115,18 @@ arvyearsur <- update(arvSurv, .~enrolYear)
 #plot(arvyearsur, mark.time=FALSE)
 
 ##need to look at summary strata 
-
+}
 arvyear <- with(arvyearsur,data.frame(
   time=time, 
-  n = c(rep(n[1],strata[1]),
-        rep(n[2],strata[2]),
-        rep(n[3],strata[3]),
-        rep(n[4],strata[4]))
-        , 
-  yr = c(rep(2011,strata[1]),
-           rep(2012,strata[2]),
-           rep(2013,strata[3]),
-           rep(2014,strata[4])),
+  n = nstrata(n,strata) , 
+  yr = catstrata(strata),
   arvcount= n.event
 ))
 
 arvyear <- arvyear %>% 
   group_by(yr) %>%  
     mutate(
-      prob = arvcount/500,
+      prob = arvcount/n,
       cumprob = cumsum(prob),
       followUp = time/year
 )
@@ -117,9 +138,32 @@ print(ggplot(arvyear, aes(followUp,cumprob,col=factor(yr),group=yr))
       + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
 )
 
-
 linkedyearsur <- update(laSurv,.~enrolYear)
 plot(linkedyearsur, mark.time=FALSE)
+
+
+linkedyear <- with(linkedyearsur,data.frame(
+  time=time, 
+  n = nstrata(n,strata),
+  yr = catstrata(strata),
+  linkedcount= n.event
+))
+
+linkedyear <- linkedyear %>% 
+  group_by(yr) %>%  
+  mutate(
+    prob = linkedcount/total,
+    cumprob = cumsum(prob),
+    followUp = time/year
+  )
+
+plot(linkedyearsur, mark.time=FALSE,main="Linked by year")
+
+
+print(ggplot(linkedyear, aes(followUp,cumprob,col=factor(yr),group=yr))
+      + geom_line() 
+      + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
+)
 
 quit()
 
