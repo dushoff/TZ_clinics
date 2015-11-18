@@ -33,8 +33,9 @@ catstrata <- function(strata){
 }
 
 # calculating day difference via dplyr for survival objects ----
-total <- length(patientTable$patientid)
+total <- nrow(patientTable)
 
+# Clean up minDate
 survTable <- (patientTable %>% 
 	mutate(e_diff= eligible_status_delay + 1
 		, arv_ever = !is.na(arv_status_delay) #arv treatment at all 
@@ -43,7 +44,8 @@ survTable <- (patientTable %>%
 		, arvFollowTime = ifelse(
 			arv_ever, arv_diff, lastdate - as.numeric(minDate) #arv diff or lastdate if no arv
 		)
-		, laFollowTime = lastdate-as.numeric(minDate) 
+		, followTime = lastdate-as.numeric(minDate) 
+		, enrolTotal = endDate-as.numeric(minDate)
 		, enrolYear = format(minDate, "%Y")
 	)
 )
@@ -51,7 +53,7 @@ survTable <- (patientTable %>%
 #####
 
 ## We want avoid using survival objects for now until we actually need the analysis (coxs ph)
-## For now, only use it for collaping data and extracting info back to dataframe 
+## For now, only use it for collapsing data and extracting info back to dataframe 
 
 # ARV treatment (Yes or No) ----
 arvSurv <- survfit(Surv(
@@ -60,7 +62,11 @@ arvSurv <- survfit(Surv(
 )
 
 print(sum(arvSurv$n.event)/arvSurv$n)
-print(plot(arvSurv,mark.time=FALSE,main='Survival: Getting ART and delay',xlab='day_lag'))
+print(plot(arvSurv
+	, mark.time=FALSE
+	, main='"Survival" until ART'
+	, xlab='Time since enrolment (days)')
+)
 
 arv <- data.frame(
 	time=arvSurv$time, 
@@ -83,7 +89,7 @@ print(ggplot(arv, aes(followUp,cumprob))
 ### Linked and Alive... for this section we don't even care about ART, simply coming to get checkup----
 
 laSurv <- survfit(
-	Surv(laFollowTime, LTFU_status) ~ 1
+	Surv(followTime, LTFU_status) ~ 1
 	, data=survTable
 )
 
