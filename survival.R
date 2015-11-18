@@ -5,6 +5,8 @@ library(survival)
 library(dplyr)
 library(ggplot2)
 
+# Functions to extract survival objects ----
+
 nstrata <- function(n,strata){
   ntemp <- numeric(sum(strata))
   temp <- numeric(length(strata)+1)
@@ -30,24 +32,28 @@ catstrata <- function(strata){
   return(ntemp)
 }
 
-{
+# calculating day difference via dplyr for survival objects ----
 total <- length(patientTable$patientid)
 
 survTable <- (patientTable %>% 
 	mutate(e_diff= eligible_status_delay + 1
-		, arv_ever = !is.na(arv_status_delay)
+		, arv_ever = !is.na(arv_status_delay) #arv treatment at all 
 		, arv_diff = arv_status_delay + 1
 		, lastdate = ifelse(LTFU_status, followUp, endDate)
 		, arvFollowTime = ifelse(
-			arv_ever, arv_diff, lastdate - as.numeric(minDate)
+			arv_ever, arv_diff, lastdate - as.numeric(minDate) #arv diff or lastdate if no arv
 		)
-		, laFollowTime = lastdate-as.numeric(minDate)
+		, laFollowTime = lastdate-as.numeric(minDate) 
 		, enrolYear = format(minDate, "%Y")
 	)
 )
 
+#####
+
 ## We want avoid using survival objects for now until we actually need the analysis (coxs ph)
-## For now, only use it for collaping data and extracting info back to dataframe
+## For now, only use it for collaping data and extracting info back to dataframe 
+
+# ARV treatment (Yes or No) ----
 arvSurv <- survfit(Surv(
 	arvFollowTime, arv_ever) ~ 1
 	, data=survTable
@@ -74,7 +80,7 @@ print(ggplot(arv, aes(followUp,cumprob))
 	+ ggtitle('Cumulative Probability of Enrolling in ART Ever (POPULATION)')
 )
 
-### Linked and Alive... for this section we don't even care about ART
+### Linked and Alive... for this section we don't even care about ART, simply coming to get checkup----
 
 laSurv <- survfit(
 	Surv(laFollowTime, LTFU_status) ~ 1
@@ -109,13 +115,13 @@ print(ggplot(linked, aes(followUp, survprob))
 	+ ylim(c(0, 1))
 )
 
-### By enrolYear
+### By enrolYear -----
 
 arvyearsur <- update(arvSurv, .~enrolYear)
 #plot(arvyearsur, mark.time=FALSE)
 
-##need to look at summary strata 
-}
+##need to look at summary strata ARV(Yes or NO) ----- 
+
 arvyear <- with(arvyearsur,data.frame(
   time=time, 
   n = nstrata(n,strata) , 
@@ -137,6 +143,8 @@ print(ggplot(arvyear, aes(followUp,cumprob,col=factor(yr),group=yr))
       + geom_line() 
       + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
 )
+
+# still in the program (coming to check up, by year) ----
 
 linkedyearsur <- update(laSurv,.~enrolYear)
 plot(linkedyearsur, mark.time=FALSE)
@@ -165,6 +173,7 @@ print(ggplot(linkedyear, aes(followUp,cumprob,col=factor(yr),group=yr))
       + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
 )
 
+# stuff we didn't do yet ------
 quit()
 
 arvyearsum <- summary(arvyearsur)
