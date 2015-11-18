@@ -60,7 +60,7 @@ arvSurv <- survfit(Surv(
 )
 
 print(sum(arvSurv$n.event)/arvSurv$n)
-print(plot(arvSurv,mark.time=FALSE,main='ARV Ever Survival',xlab='day_lag'))
+print(plot(arvSurv,mark.time=FALSE,main='Survival: Getting ART and delay',xlab='day_lag'))
 
 arv <- data.frame(
 	time=arvSurv$time, 
@@ -77,7 +77,7 @@ arv <- arv %>% mutate(
 ### This is the cumulative probability plot of Enrolling in ART out of the population	
 print(ggplot(arv, aes(followUp,cumprob))
 	+ geom_line() 
-	+ ggtitle('Cumulative Probability of Enrolling in ART Ever (POPULATION)')
+	+ ggtitle('Cumulative Probability of Getting ART (POPULATION)')
 )
 
 ### Linked and Alive... for this section we don't even care about ART, simply coming to get checkup----
@@ -104,7 +104,7 @@ linked <- linked %>% mutate(
 	, followUp = time/year
 )
 
-print(plot(laSurv,mark.time=FALSE,main='Linked',xlab='Day Lag'))
+print(plot(laSurv,mark.time=FALSE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
 
 
 print(ggplot(linked, aes(followUp, survprob))
@@ -115,12 +115,10 @@ print(ggplot(linked, aes(followUp, survprob))
 	+ ylim(c(0, 1))
 )
 
-### By enrolYear -----
+### By enrolYear need to look at summary strata ARV(Yes or NO) -----
 
 arvyearsur <- update(arvSurv, .~enrolYear)
 #plot(arvyearsur, mark.time=FALSE)
-
-##need to look at summary strata ARV(Yes or NO) ----- 
 
 arvyear <- with(arvyearsur,data.frame(
   time=time, 
@@ -136,18 +134,18 @@ arvyear <- arvyear %>%
       cumprob = cumsum(prob),
       followUp = time/year
 )
-
-print(plot(arvyearsur,mark.time = FALSE,main='ARV Ever Survival by Year',xlab="day lag"))
+yr <- unique(arvyear$yr)
+print(plot(arvyearsur,mark.time = FALSE,main='Survival by Year: Getting ARV and delay',xlab="day lag",col=yr))
 
 print(ggplot(arvyear, aes(followUp,cumprob,col=factor(yr),group=yr))
       + geom_line() 
-      + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
+      + ggtitle('Cumulative Probability of getting ART (POPULATION) by Year')
 )
 
 # still in the program (coming to check up, by year) ----
 
 linkedyearsur <- update(laSurv,.~enrolYear)
-plot(linkedyearsur, mark.time=FALSE)
+#plot(linkedyearsur, mark.time=FALSE)
 
 
 linkedyear <- with(linkedyearsur,data.frame(
@@ -165,12 +163,12 @@ linkedyear <- linkedyear %>%
     followUp = time/year
   )
 
-plot(linkedyearsur, mark.time=FALSE,main="Linked by year")
+plot(linkedyearsur, mark.time=FALSE,main="Survival Linked by Year: Enrolling in program (getting check up)",col=yr)
 
 
 print(ggplot(linkedyear, aes(followUp,cumprob,col=factor(yr),group=yr))
       + geom_line() 
-      + ggtitle('Cumulative Probability of Enrolling in ART (POPULATION) by Year')
+      + ggtitle('Cumulative Probability of population still in the program by Year')
 )
 
 # stuff we didn't do yet ------
