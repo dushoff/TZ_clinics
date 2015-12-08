@@ -33,7 +33,6 @@ catstrata <- function(strata){
 }
 
 # calculating day difference via dplyr for survival objects ----
-total <- nrow(patientTable)
 
 # Clean up minDate
 survTable <- (patientTable %>% 
@@ -53,6 +52,7 @@ survTable <- (patientTable %>%
 ##trying to figure out what survival is doing 
 dat <- head(survTable,20)
 dat <- dat %>% select(c(arvFollowTime,arv_ever,patientid))
+total <- nrow(dat)
 
 #number of patients getting arv 
 sum(dat$arv_ever)
