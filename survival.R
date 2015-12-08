@@ -50,6 +50,12 @@ survTable <- (patientTable %>%
 	)
 )
 
+##trying to figure out what survival is doing 
+dat <- head(survTable,20)
+dat <- dat %>% select(c(arvFollowTime,arv_ever,patientid))
+
+#number of patients getting arv 
+sum(dat$arv_ever)
 #####
 
 ## We want avoid using survival objects for now until we actually need the analysis (coxs ph)
@@ -58,7 +64,7 @@ survTable <- (patientTable %>%
 # ARV treatment (Yes or No) ----
 arvSurv <- survfit(Surv(
 	arvFollowTime, arv_ever) ~ 1
-	, data=survTable
+	, data=dat
 )
 
 print(sum(arvSurv$n.event)/arvSurv$n)
