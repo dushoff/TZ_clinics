@@ -49,14 +49,8 @@ survTable <- (patientTable %>%
 	)
 )
 
-##trying to figure out what survival is doing 
-dat <- head(survTable,20)
-dat <- dat %>% select(c(arvFollowTime,arv_ever,patientid))
-total <- nrow(dat)
-
-#number of patients getting arv 
-sum(dat$arv_ever)
-#####
+##trying to figure out what survival is doing ----
+total <- nrow(survTable)
 
 ## We want avoid using survival objects for now until we actually need the analysis (coxs ph)
 ## For now, only use it for collapsing data and extracting info back to dataframe 
@@ -64,25 +58,30 @@ sum(dat$arv_ever)
 # ARV treatment (Yes or No) ----
 arvSurv <- survfit(Surv(
 	arvFollowTime, arv_ever) ~ 1
-	, data=dat
+	, data=survTable
 )
 
-print(sum(arvSurv$n.event)/arvSurv$n)
 print(plot(arvSurv
-	, mark.time=FALSE
+	, mark.time=TRUE
 	, main='"Survival" until ART'
 	, xlab='Time since enrolment (days)')
 )
 
+# I like mark.time because the censored patient is used in the 
+# KM survival calcuation 
+
 arv <- data.frame(
 	time=arvSurv$time, 
-	n = arvSurv$n, 
-	arvcount= arvSurv$n.event
+	nrisk = arvSurv$n.risk, 
+	events <- arvSurv$n.event
 )
 
+## S(t) = PRODUCT ( (#risk - #event) / #risk )
+## That was why the numbers on my ggplot did not add up SORRY!!
+
 arv <- arv %>% mutate(
-	prob = arvcount/total,
-	cumprob = cumsum(prob),
+	surv = cumprod((nrisk-events)/nrisk),
+	cumprob = 1-surv, 
 	followUp = time/year
 )
 
@@ -90,6 +89,7 @@ arv <- arv %>% mutate(
 print(ggplot(arv, aes(followUp,cumprob))
 	+ geom_line() 
 	+ ggtitle('Cumulative Probability of Getting ART (POPULATION)')
+	+ theme_bw()
 )
 
 ### Linked and Alive... for this section we don't even care about ART, simply coming to get checkup----
@@ -99,33 +99,30 @@ laSurv <- survfit(
 	, data=survTable
 )
 
-laSurv
-
-print(sum(laSurv$n.event)/laSurv$n)
-
 linked <- data.frame(
 	time=laSurv$time
-	, n= laSurv$n
+	, nrisk= laSurv$n.risk
 	, linkedcount= laSurv$n.event
 )
 
 linked <- linked %>% mutate(
-	prob = linkedcount/total
-	, cumprob = cumsum(prob)
-	, survprob = 1-cumsum(prob)
+	surv = cumprod((nrisk-linkedcount)/nrisk)
+	, cumprob = 1 - surv
 	, followUp = time/year
 )
 
-print(plot(laSurv,mark.time=FALSE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
+print(plot(laSurv,mark.time=TRUE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
 
 
-print(ggplot(linked, aes(followUp, survprob))
+print(ggplot(linked, aes(followUp, cumprob))
 	+ xlab("Follow-up years")
 	+ ylab("Survival Probaiblity")
 	+ geom_line()
 	+ ggtitle('Survival while linked to care')
 	+ ylim(c(0, 1))
+	+ theme_bw()
 )
+
 
 ### By enrolYear need to look at summary strata ARV(Yes or NO) -----
 
@@ -134,7 +131,7 @@ arvyearsur <- update(arvSurv, .~enrolYear)
 
 arvyear <- with(arvyearsur,data.frame(
   time=time, 
-  n = nstrata(n,strata) , 
+  nrisk = nstrata(n.risk,strata) , 
   yr = catstrata(strata),
   arvcount= n.event
 ))
@@ -142,8 +139,8 @@ arvyear <- with(arvyearsur,data.frame(
 arvyear <- arvyear %>% 
   group_by(yr) %>%  
     mutate(
-      prob = arvcount/n,
-      cumprob = cumsum(prob),
+      surv = cumprod((nrisk-arvcount)/nrisk),
+      cumprob = 1-surv,
       followUp = time/year
 )
 yr <- unique(arvyear$yr)
@@ -162,7 +159,7 @@ linkedyearsur <- update(laSurv,.~enrolYear)
 
 linkedyear <- with(linkedyearsur,data.frame(
   time=time, 
-  n = nstrata(n,strata),
+  nrisk = nstrata(n.risk,strata),
   yr = catstrata(strata),
   linkedcount= n.event
 ))
@@ -170,8 +167,8 @@ linkedyear <- with(linkedyearsur,data.frame(
 linkedyear <- linkedyear %>% 
   group_by(yr) %>%  
   mutate(
-    prob = linkedcount/total,
-    cumprob = cumsum(prob),
+    surv = cumprod((nrisk-linkedcount)/nrisk),
+    cumprob = 1-surv,
     followUp = time/year
   )
 
