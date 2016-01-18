@@ -4,6 +4,7 @@
 library(survival)
 library(dplyr)
 library(ggplot2)
+#library(rms)
 
 # Functions to extract survival objects ----
 
@@ -130,16 +131,20 @@ arvYearSurv <- update(arvSurv, .~enrolYear)
 summary(arvYearSurv)
 print(arvYearSurv)
 
-arvPH <- coxph(
+
+arvpsm <- psm(
 	Surv(arvFollowTime, arv_ever) ~ 1
 	, data=survTable
 )
 
-arvYearPH <- coxph(
-	Surv(arvFollowTime, arv_ever) ~ 1+enrolYear
-	, data=survTable
+print(arvpsm)
+
+arvYearpsm <- psm(
+  Surv(arvFollowTime, arv_ever) ~ enrolYear
+  , data=survTable
 )
 
+print(arvYearpsm)
 # plot(arvYearPH)
 summary(arvYearPH)
 print(arvYearPH)
