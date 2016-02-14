@@ -68,6 +68,11 @@ print(plot(arvSurv
 	, xlab='Time since enrolment (days)')
 )
 
+
+quit()
+## why can't I make? stop here for now 
+
+
 # I like mark.time because the censored patient is used in the 
 # KM survival calcuation 
 
