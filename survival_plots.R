@@ -1,43 +1,6 @@
 library(survival)
 library(ggplot2)
-
-
-# ARV treatment (Yes or No) ----
-arvSurv <- survfit(
-  Surv(arvFollowTime, arv_ever) ~ 1
-  , data=survTable
-)
-
-print(plot(arvSurv
-           , mark.time=TRUE
-           , main='"Survival" until ART'
-           , xlab='Time since enrolment (days)')
-)
-
-
-# I like mark.time because the censored patient is used in the 
-
-arv <- data.frame(
-  time=arvSurv$time, 
-  nrisk = arvSurv$n.risk, 
-  events <- arvSurv$n.event
-)
-
-## S(t) = PRODUCT ( (#risk - #event) / #risk )
-## That was why the numbers on my ggplot did not add up SORRY!!
-
-arv <- arv %>% mutate(
-  surv = cumprod((nrisk-events)/nrisk),
-  cumprob = 1-surv, 
-  followUp = time/year
-)
-
-### This is the cumulative probability plot of Enrolling in ART out of the population	
-print(ggplot(arv, aes(followUp,cumprob))
-      + geom_line() 
-      + ggtitle('Cumulative Probability of Getting ART (POPULATION)')
-      + theme_bw()
-)
+library(dplyr)
 
 ### Linked and Alive... for this section we don't even care about ART, simply coming to get checkup----
 
@@ -60,6 +23,13 @@ linked <- linked %>% mutate(
 
 print(plot(laSurv,mark.time=TRUE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
 
+print(plot(laSurv,mark.time=TRUE
+           , main='Linked Survival: Enrolling in program (getting check up)'
+           , xlab='Day Lag'
+           , fun = function(x){1-x}
+           )
+      )
+
 
 print(ggplot(linked, aes(followUp, cumprob))
       + xlab("Follow-up years")
@@ -69,6 +39,64 @@ print(ggplot(linked, aes(followUp, cumprob))
       + ylim(c(0, 1))
       + theme_bw()
 )
+
+
+
+# ARV treatment (Yes or No) ----
+
+##testing first 30 patients 
+aa <- head(survTable,30)
+aaa <- aa %>% select(arvFollowTime,arv_ever)
+
+arvSurv <- survfit(
+  Surv(arvFollowTime, arv_ever, type= "right") ~ 1
+ , data=survTable
+   # ,data=aaa
+)
+
+print(plot(arvSurv
+           , mark.time=TRUE
+           , main='"Survival" until ART'
+           , xlab='Time since enrolment (days)'
+           )
+)
+
+
+print(plot(arvSurv
+           , mark.time=TRUE
+           , main='"Survival" until ART'
+           , xlab='Time since enrolment (days)'
+           , fun = function(x){1-x}
+           )
+)
+
+
+# The censering graph is weird, I don't like it because the censered data changes nrisk
+# creating weird jumps.
+
+
+arv <- data.frame(
+  time=arvSurv$time, 
+  nrisk = arvSurv$n.risk, 
+  events <- arvSurv$n.event
+)
+
+## S(t) = PRODUCT ( (#risk - #event) / #risk )
+## It is weird no matter how you look at it.
+
+arv <- arv %>% mutate(
+  surv = cumprod((nrisk-events)/nrisk),
+  cumprob = 1-surv, 
+  followUp = time/year
+)
+
+### This is the cumulative probability plot of Enrolling in ART out of the population	
+print(ggplot(arv, aes(followUp,cumprob))
+      + geom_line() 
+      + ggtitle('Cumulative Probability of Getting ART (POPULATION)')
+      + theme_bw()
+)
+
 
 
 ### By enrolYear need to look at summary strata ARV(Yes or NO) -----

@@ -74,6 +74,8 @@ StatusDelay <- (patientdat  %>%
 	  enrolled_year = dateYear,
 		eligible_status_delay = delay_first(eligible,
 			., eligible==TRUE),
+		eligible_status_delay2 = delay_first(e2,
+		  ., e2==TRUE),
 		eligible_status_year = statusYear(.,eligible_status_delay),
 		arv_status_delay = delay_first(arvstatuscode,
 			., arvstatuscode == "Start ARV"),

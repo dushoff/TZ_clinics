@@ -14,7 +14,9 @@ keepvar <- c(
 	"referredfromid",
 	"death",
 	"status",
-	"medication2"
+	"medication2",
+	"elig"
+	
 )
 
 c_visits <- c_visits[keepvar]

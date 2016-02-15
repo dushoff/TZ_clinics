@@ -36,7 +36,9 @@ eligible <- (c_visits
 						 combineInfo(cd4percent<25,cd4<750))
 				| cd4<350
 			)        
-		)
+		),
+		e3 = ifelse((elig=="Eligible"),TRUE,eligible) ,
+		e2 = (e3|eligible)
 	)
 	%>% ungroup 
 )

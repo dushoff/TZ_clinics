@@ -1,0 +1,82 @@
+---
+title: "Survival_overview"
+author: "mike li"
+date: "February 15, 2016"
+output: html_document
+---
+
+```{r}
+library(survival)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+load("survival.sample.RData")
+```
+
+```{r, echo=FALSE}
+
+par(mfrow=c(1,2))
+
+laSurv <- survfit(
+  Surv(followTime, LTFU_status) ~ 1
+  , data=survTable
+)
+
+linked <- data.frame(
+  time=laSurv$time
+  , nrisk= laSurv$n.risk
+  , linkedcount= laSurv$n.event
+)
+
+linked <- linked %>% mutate(
+  surv = cumprod((nrisk-linkedcount)/nrisk)
+  , cumprob = 1 - surv
+  , followUp = time/year
+)
+
+g1 <- (ggplot(linked, aes(followUp, surv))
+      + xlab("Follow-up years")
+      + ylab("Survival Probaiblity")
+      + geom_line()
+      + ggtitle('Survival while linked to care')
+      + ylim(c(0, 1))
+      + theme_bw()
+)
+
+arvSurv <- survfit(
+  Surv(arvFollowTime, arv_ever, type= "right") ~ 1
+ , data=survTable
+   # ,data=aaa
+)
+
+
+
+arv <- data.frame(
+  time=arvSurv$time, 
+  nrisk = arvSurv$n.risk, 
+  events <- arvSurv$n.event
+)
+
+## S(t) = PRODUCT ( (#risk - #event) / #risk )
+## It is weird no matter how you look at it.
+
+arv <- arv %>% mutate(
+  surv = cumprod((nrisk-events)/nrisk),
+  cumprob = 1-surv, 
+  followUp = time/year
+)
+
+### This is the cumulative probability plot of Enrolling in ART out of the population	
+g2<- (ggplot(arv, aes(followUp,cumprob))
+      + geom_line() 
+      + ggtitle('Cumulative Probability of Getting ART (POPULATION)')
+      + theme_bw()
+)
+
+grid.arrange(g1,g2,ncol=2)
+
+
+
+```
+
+
