@@ -1,26 +1,58 @@
 ---
 title: "Survival_overview"
 author: "mike li"
-date: "February 15, 2016"
-output: html_document
+date: "February 16, 2016"
+fontsize : 8pt
+output:
+  ioslides_presentation
 ---
+<style>
+.refs {
+   font-size: 12px;
+}
+h2 { 
+ color: #3399ff;		
+}
+h3 { 
+ color: #3399ff;		
+}
+.title-slide {
+   background-color: #55bbff;
+}
+</style>
+<style type="text/css">
+body{ /* Normal */
+  font-size: 8pt;}
+img {     
+  max-height: 400px;     
+  max-width: 400px; 
+}
 
-```{r}
+pre{font-size: 8pt;}
+</style>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(survival)
 library(ggplot2)
 library(dplyr)
 library(gridExtra)
 load("survival.sample.RData")
+library(knitr)
+library(xtable)
+opts_chunk$set(echo=FALSE,fig.width=6,fig.height=4,out.width=1000,fig.align = "center")
+
 ```
 
 ##Intro
 
 Bla Bla Bla
 
-##
+## Preliminary Survival analysis 
 
-![](./picture/recyclepicture.png)
+![](./pictures/recyclepicture.png)
 
+
+## Linked Survival Analysis
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 laSurv <- survfit(
@@ -29,48 +61,184 @@ laSurv <- survfit(
 )
 
 
-g1 <- (plot(laSurv,mark.time=TRUE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
-
-print(g1)
+g1 <- (plot(laSurv,
+            main='Linked Survival: Enrolling in program (getting check up)',
+            xlab='Day Lag',
+            ylab="Survival Probability"))
 
 print(sum(laSurv$n.event)/laSurv$n)
 ```
 
+- The quanity above is the proportion of patient drop-outs (lost to follow up)
+- The marks represent censored patients. Failure to LTFU means we have no idea if they will be LTFU in the future
+
+## Eligibility and Treatment
 ```{r art and eligible, echo=FALSE, message=FALSE, warning=FALSE}
+
 arvSurv <- survfit(
   Surv(arvFollowTime, arv_ever, type= "right") ~ 1
  , data=survTable
-   # ,data=aaa
 )
 
+eliSurv <- survfit(
+  Surv(eligibleTime, rep(TRUE,nrow(survTable)), type= "right") ~ 1
+ , data=survTable
+)
+  
+dateli <- data.frame(
+  elitime = eliSurv$time,
+  elinrisk = eliSurv$n.risk, 
+  elievents <- eliSurv$n.event
+)
 
-
-arv <- data.frame(
-  time=arvSurv$time, 
-  nrisk = arvSurv$n.risk, 
-  events <- arvSurv$n.event
+datarv <- data.frame(
+  arvtime=arvSurv$time, 
+  arvnrisk = arvSurv$n.risk, 
+  arvevents <- arvSurv$n.event
 )
 
 ## S(t) = PRODUCT ( (#risk - #event) / #risk )
 ## It is weird no matter how you look at it.
 
-arv <- arv %>% mutate(
-  surv = cumprod((nrisk-events)/nrisk),
-  cumprob = 1-surv, 
-  followUp = time/year
+datarv <- datarv %>% mutate(
+  arvsurv = cumprod((arvnrisk-arvevents)/arvnrisk),
+  arvcumprob = 1-arvsurv, 
+  arvfollowUp = arvtime/year
+)
+
+dateli <- dateli %>% mutate(
+  elisurv = cumprod((elinrisk-elievents)/elinrisk),
+  elicumprob = 1-elisurv, 
+  elifollowUp = elitime/year
+)
+
+dat <- data.frame(type = c(rep("ART",nrow(datarv)),
+                           rep("Eli",nrow(dateli))),
+                  cumprob = c(datarv$arvcumprob,dateli$elicumprob),
+                  followUp = c(datarv$arvfollowUp,dateli$elifollowUp)
 )
 
 ### This is the cumulative probability plot of Enrolling in ART out of the population	
-g2<- (ggplot(arv, aes(followUp,cumprob))
+g2<- (ggplot(dat, aes(followUp,cumprob,color=type,group=type))
       + geom_line() 
-      + ggtitle('Cumulative Probability of Getting ART (POPULATION)')
+      + ggtitle("I don't know what to name this")
+      + ylab("1 - S(t)")
       + theme_bw()
 )
 
 print(g2)
-#grid.arrange(g1,g2,ncol=2)
+#grid.arrange(g2,g3,ncol=2)
+```
 
+- no censoring for eligiblity because everyone will be eligible by 4/1/2015
+- approx 70% people get ART (plot is takes account for censored data, that is why it is more than 70%)
+- $S(t) = \prod_{t_i<t} \frac{n_{risk} - e_i}{n_{risk}}$, $e_{i}$ is number of events at $t_i$
+
+## Questions 
+
+###Linked vs Eligibility
+- ?? maybe long eligibility delays lead to LTFU??
+
+###Eligiblity vs ART
+- Eligible but do not get treatment 
+- Time delay between first visit, eligibility and treatment
+
+###ART vs Linked
+- No ART but still linked
+- Got ART but LTFU 
+
+## Covariates
+
+### Base 
+
+- Gender
+- Location (Not doing)
+
+### WHO Policy Change
+
+- Age (first visit seems to be the easiest)
+- Year of Enrollment (diddo)
+
+### Biological
+
+- CD4 (diddo)
+- others (help me out guys)
+
+## Incorperating Gender 
+
+```{r linked gender, echo=FALSE, warning=FALSE, message=FALSE}
+glaSurv <- update(laSurv,.~sex_baseline)
+g3 <- (plot(glaSurv,
+            col = c(2,3),
+            main='Linked Survival: Enrolling in program (by gender)',
+            xlab='Day Lag',
+            ylab="Survival Probability"))
+
+```
+- $n_{risk}$ according to its strata (gender)
+
+## Coxph summary (don't know how to make it look nicer)
+
+```{r coxph summary gender, echo=FALSE, warning=FALSE, message=FALSE}
+options(width = 1000)
+coxg3 <- coxph(Surv(followTime, LTFU_status)~factor(sex_baseline),data=survTable)
+### clean up the sex leveling problem later
+print(summary(coxg3))
 
 ```
 
+## Year
 
+```{r cox by year, echo=FALSE, warning=FALSE, message=FALSE}
+
+ylaSurv <- update(laSurv,.~enrolYear)
+g4 <- (plot(ylaSurv,
+            col = c(2,3,4,5),
+            main='Linked Survival: Enrolling in program (by year)',
+            xlab='Day Lag',
+            ylab="Survival Probability"))
+
+```
+
+- This graph is very cool. It looks like more failure to LTFU as time goes.
+- go back to our question about eligibility vs linked
+
+
+## Year linked summary
+
+```{r year linked cox, echo=FALSE, message=FALSE, warning=FALSE}
+
+coxg4 <- coxph(Surv(followTime, LTFU_status)~enrolYear,data=survTable)
+### clean up the sex leveling problem later
+print(summary(coxg4))
+```
+
+## AGE (I think it is a mess)
+```{r age linked cox, echo=FALSE, message=FALSE, warning=FALSE}
+
+alaSurv <- update(laSurv,.~age_first)
+g5 <- (plot(alaSurv,
+            col = c(1:20),
+            main='Linked Survival: Enrolling in program (by age)',
+            xlab='Day Lag',
+            ylab="Survival Probability"))
+```
+- It is all over the place, maybe ask BB how to make it look nicer
+- I think it is more useful to look at coxph summary
+
+## Age COXPH summary
+```{r age linked cox summary, warning=FALSE, echo=FALSE, message=FALSE}
+
+coxg5 <- coxph(Surv(followTime, LTFU_status)~age_first,data=survTable)
+### clean up the sex leveling problem later
+print(summary(coxg5))
+
+```
+
+## Eligibility and Treatment 
+
+```{r eli arv gender, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+
+```

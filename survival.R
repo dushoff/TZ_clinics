@@ -39,9 +39,9 @@ eliDate <- as.Date("2015-04-01")
 
 # Clean up minDate
 survTable <- (patientTable %>% 
-	mutate(e_diff= eligible_status_delay + 1
+	mutate(e_diff= eligible_status_delay2 + 1
 	  , eligible_ever = !is.na(eligible_status_delay2)
-	  , eligibleTime = ifelse(eligible_ever,e_diff,eliDate)
+	  , eligibleTime = ifelse(eligible_ever,e_diff,eliDate-as.numeric(minDate))
 		, arv_ever = !is.na(arv_status_delay) #arv treatment at all 
 		, arv_diff = arv_status_delay + 1
 		, lastdate = ifelse(LTFU_status, followUp, endDate)

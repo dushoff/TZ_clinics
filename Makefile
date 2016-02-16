@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: survival.sample.Rout 
+target pngtarget pdftarget vtarget acrtarget: survival_overview.html
 
 ##################################################################
 
@@ -27,6 +27,9 @@ Sources += R.mk
 include R.mk
 
 -include crib.mk
+
+survival_overview.html:	survival_overview.Rmd
+			Rscript -e "library(\"rmarkdown\"); render(\"$<\")"
 
 ######################################################################
 
