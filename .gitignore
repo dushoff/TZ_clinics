@@ -27,3 +27,4 @@ testdir_old/
 compiler.mk
 
 *.makestuff
+*.html
