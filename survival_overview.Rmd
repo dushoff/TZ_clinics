@@ -39,7 +39,7 @@ library(gridExtra)
 load("survival.sample.RData")
 library(knitr)
 library(xtable)
-opts_chunk$set(echo=FALSE,fig.width=6,fig.height=4,out.width=1000,fig.align = "center")
+opts_chunk$set(echo=FALSE,fig.width=6,fig.height=4,fig.align = "center")
 
 ```
 
@@ -183,7 +183,7 @@ g3 <- (plot(glaSurv,
 options(width = 1000)
 coxg3 <- coxph(Surv(followTime, LTFU_status)~factor(sex_baseline),data=survTable)
 ### clean up the sex leveling problem later
-print(summary(coxg3))
+summary(coxg3)
 
 ```
 
@@ -210,7 +210,7 @@ g4 <- (plot(ylaSurv,
 
 coxg4 <- coxph(Surv(followTime, LTFU_status)~enrolYear,data=survTable)
 ### clean up the sex leveling problem later
-print(summary(coxg4))
+summary(coxg4)
 ```
 
 ## AGE (I think it is a mess)
@@ -231,7 +231,7 @@ g5 <- (plot(alaSurv,
 
 coxg5 <- coxph(Surv(followTime, LTFU_status)~age_first,data=survTable)
 ### clean up the sex leveling problem later
-print(summary(coxg5))
+summary(coxg5)
 
 ```
 
