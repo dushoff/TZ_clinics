@@ -13,36 +13,30 @@ library(gridExtra)
 load("survival.sample.RData")
 ```
 
-```{r, echo=FALSE}
+##Intro
 
-par(mfrow=c(1,2))
+Bla Bla Bla
+
+##
+
+![](./picture/recyclepicture.png)
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 laSurv <- survfit(
   Surv(followTime, LTFU_status) ~ 1
   , data=survTable
 )
 
-linked <- data.frame(
-  time=laSurv$time
-  , nrisk= laSurv$n.risk
-  , linkedcount= laSurv$n.event
-)
 
-linked <- linked %>% mutate(
-  surv = cumprod((nrisk-linkedcount)/nrisk)
-  , cumprob = 1 - surv
-  , followUp = time/year
-)
+g1 <- (plot(laSurv,mark.time=TRUE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
 
-g1 <- (ggplot(linked, aes(followUp, surv))
-      + xlab("Follow-up years")
-      + ylab("Survival Probaiblity")
-      + geom_line()
-      + ggtitle('Survival while linked to care')
-      + ylim(c(0, 1))
-      + theme_bw()
-)
+print(g1)
 
+print(sum(laSurv$n.event)/laSurv$n)
+```
+
+```{r art and eligible, echo=FALSE, message=FALSE, warning=FALSE}
 arvSurv <- survfit(
   Surv(arvFollowTime, arv_ever, type= "right") ~ 1
  , data=survTable
@@ -73,8 +67,8 @@ g2<- (ggplot(arv, aes(followUp,cumprob))
       + theme_bw()
 )
 
-grid.arrange(g1,g2,ncol=2)
-
+print(g2)
+#grid.arrange(g1,g2,ncol=2)
 
 
 ```
