@@ -238,7 +238,147 @@ summary(coxg5)
 ## Eligibility and Treatment 
 
 ```{r eli arv gender, echo=FALSE, warning=FALSE, message=FALSE}
+garvSurv <- update(arvSurv, .~sex_baseline)
+datgarv <- data.frame(arvtime = summary(garvSurv)$time
+                      , arvnrisk = summary(garvSurv)$n.risk
+                      , arvevents = summary(garvSurv)$n.event
+                      , gender = summary(garvSurv)$strata
+)
+datgarv <- (datgarv 
+            %>% group_by(gender)
+            %>% mutate(
+                arvsurv = cumprod((arvnrisk-arvevents)/arvnrisk),
+                arvcumprob = 1-arvsurv, 
+                arvfollowUp = arvtime/year
+                )
+)
+
+geliSurv <- update(eliSurv, .~sex_baseline)
+datgeli <- data.frame(elitime = summary(geliSurv)$time
+                      , elinrisk = summary(geliSurv)$n.risk
+                      , elievents = summary(geliSurv)$n.event
+                      , gender = summary(geliSurv)$strata
+)
+datgeli <- (datgeli 
+            %>% group_by(gender)
+            %>% mutate(
+                elisurv = cumprod((elinrisk-elievents)/elinrisk),
+                elicumprob = 1-elisurv, 
+                elifollowUp = elitime/year
+            )
+)
+
+datg <- data.frame(type = c(rep("ART",nrow(datgarv)),
+                           rep("Eli",nrow(datgeli))),
+                  cumprob = c(datgarv$arvcumprob,datgeli$elicumprob),
+                  followUp = c(datgarv$arvfollowUp,datgeli$elifollowUp),
+                  gender = c(datgarv$gender,datgeli$gender)
+)
+
+datg <- datg %>% mutate(sex = ifelse(gender == 1, "Male","Female"))
+g5<- (ggplot(datg, aes(followUp,cumprob,color=factor(sex),lty=factor(type)))
+      + geom_line() 
+      + ggtitle("I don't know what to name this")
+      + ylab("1 - S(t)")
+      + theme_bw()
+)
+
+print(g5)
+
+```
+
+Proportion of males eligible to ART is higher than female, whereas, enrollment is about the same.
+
+## Coxph for Eligibility and ART (gender)
+
+Look at it in R. I'll as BB if we can output the summaries nicer.
+```{r coxph eligible gender, echo=FALSE, message=FALSE, warning=FALSE}
+coxgeli <- coxph(
+  Surv(eligibleTime,rep(TRUE,nrow(survTable)))~factor(sex_baseline),data=survTable)
+
+summary(coxgeli)
+
+```
 
 
+## Coxph ART gender
+```{r art gender, echo=FALSE,warning=FALSE, message=FALSE}
+coxgarv <- coxph(Surv(arvFollowTime, arv_ever)~factor(sex_baseline),data=survTable)
+### clean up the sex leveling problem later
+summary(coxgarv)
+
+```
+
+## Enrollment Year for Eligibility and ART
+
+```{r year,eli and art, echo=FALSE,message=FALSE, warning=FALSE}
+
+yarvSurv <- update(arvSurv,.~enrolYear)
+datyarv <- data.frame(arvtime = summary(yarvSurv)$time
+                      , arvnrisk = summary(yarvSurv)$n.risk
+                      , arvevents = summary(yarvSurv)$n.event
+                      , YEAR = summary(yarvSurv)$strata
+)
+datyarv <- (datyarv 
+            %>% group_by(YEAR)
+            %>% mutate(
+                arvsurv = cumprod((arvnrisk-arvevents)/arvnrisk),
+                arvcumprob = 1-arvsurv, 
+                arvfollowUp = arvtime/year
+                )
+)
+
+yeliSurv <- update(eliSurv, .~enrolYear)
+datyeli <- data.frame(elitime = summary(yeliSurv)$time
+                      , elinrisk = summary(yeliSurv)$n.risk
+                      , elievents = summary(yeliSurv)$n.event
+                      , YEAR = summary(yeliSurv)$strata
+)
+datyeli <- (datyeli 
+            %>% group_by(YEAR)
+            %>% mutate(
+                elisurv = cumprod((elinrisk-elievents)/elinrisk),
+                elicumprob = 1-elisurv, 
+                elifollowUp = elitime/year
+            )
+)
+
+daty <- data.frame(type = c(rep("ART",nrow(datyarv)),
+                           rep("Eli",nrow(datyeli))),
+                  cumprob = c(datyarv$arvcumprob,datyeli$elicumprob),
+                  followUp = c(datyarv$arvfollowUp,datyeli$elifollowUp),
+                  YEAR = c(datyarv$YEAR,datyeli$YEAR)
+)
+
+g6<- (ggplot(daty, aes(followUp,cumprob,color=factor(YEAR),lty=factor(type)))
+      + geom_line() 
+      + ggtitle("I don't know what to name this")
+      + ylab("1 - S(t)")
+      + facet_grid(.~YEAR)
+      + theme_bw()
+)
+
+print(g6)
+
+
+```
+
+
+## Coxph for Eligibility and ART (YEAR)
+
+```{r coxph eligible enrolYear, echo=FALSE, message=FALSE, warning=FALSE}
+coxyeli <- coxph(
+  Surv(eligibleTime,rep(TRUE,nrow(survTable)))~factor(enrolYear),data=survTable)
+
+summary(coxyeli)
+
+```
+
+
+## Coxph ART YEAR
+```{r art enrolYear, echo=FALSE,warning=FALSE, message=FALSE}
+coxyarv <- coxph(Surv(arvFollowTime, arv_ever)~factor(enrolYear),data=survTable)
+### clean up the sex leveling problem later
+summary(coxyarv)
 
 ```
