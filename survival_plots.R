@@ -21,7 +21,7 @@ linked <- linked %>% mutate(
   , followUp = time/year
 )
 
-print(ggplot(linked, aes(followUp, cumprob))
+print(ggplot(linked, aes(followUp, surv))
       + xlab("Lags (years)")
       + ylab("Survival Probaiblity")
       + geom_line()
@@ -30,65 +30,89 @@ print(ggplot(linked, aes(followUp, cumprob))
       + theme_bw()
 )
 
-quit()
 
-# ARV treatment (Yes or No) ----
+# Eligible for ART (Yes or No) ----
 
-##testing first 30 patients 
-aa <- head(survTable,30)
-aaa <- aa %>% select(arvFollowTime,arv_ever)
-
-arvSurv <- survfit(
-  Surv(arvFollowTime, arv_ever, type= "right") ~ 1
- , data=survTable
-   # ,data=aaa
+ELISurv <- survfit(
+  Surv(eligibleTime, eligible_ever, type= "right") ~ 1
+  , data=survTable
 )
 
-print(plot(arvSurv
-           , mark.time=TRUE
-           , main='"Survival" until ART'
-           , xlab='Time since enrolment (days)'
-           )
+datELI <- data.frame(
+  time = ELISurv$time,
+  nrisk = ELISurv$n.risk,
+  nrisk2 = nrow(survTable),
+  events = ELISurv$n.event
 )
 
+# I'll make a function for this later
+for(i in 2:nrow(datELI)){
+  datELI$nrisk2[i] <- datELI$nrisk2[i-1] - datELI$events[i-1]
+}
 
-print(plot(arvSurv
-           , mark.time=TRUE
-           , main='"Survival" until ART'
-           , xlab='Time since enrolment (days)'
-           , fun = function(x){1-x}
-           )
-)
-
-
-# The censering graph is weird, I don't like it because the censered data changes nrisk
-# creating weird jumps.
-
-
-arv <- data.frame(
-  time=arvSurv$time, 
-  nrisk = arvSurv$n.risk, 
-  events <- arvSurv$n.event
-)
-
-## S(t) = PRODUCT ( (#risk - #event) / #risk )
-## It is weird no matter how you look at it.
-
-arv <- arv %>% mutate(
+datELI <- datELI %>% mutate(
   surv = cumprod((nrisk-events)/nrisk),
-  cumprob = 1-surv, 
+  surv2 = cumprod((nrisk2 - events)/nrisk2),
+  cumprob = 1-surv,
+  cumprob2 = 1- surv2,
   followUp = time/year
 )
 
-### This is the cumulative probability plot of Enrolling in ART out of the population	
-print(ggplot(arv, aes(followUp,cumprob))
+dat2ELI <- (data.frame(time = c(datELI$followUp,datELI$followUp),
+                        cumprob = c(datELI$cumprob,datELI$cumprob2),
+                        censoring = c(rep("Yes",nrow(datELI)),rep("No",nrow(datELI)))
+))
+
+ELIplot<- (ggplot(dat2ELI, aes(time,cumprob,colour=censoring))
       + geom_line() 
-      + ggtitle('Cumulative Probability of Getting ART (POPULATION)')
+      + ggtitle("I don't know what to name this")
+      + ylab("1 - S(t)")
       + theme_bw()
 )
 
+print(ELIplot)
+## ART (Yes or No) ----
 
+ARTSurv <- survfit(
+  Surv(arvFollowTime, arv_ever, type= "right") ~ 1
+  , data=survTable
+)
 
+datART <- data.frame(
+  time = ARTSurv$time,
+  nrisk = ARTSurv$n.risk,
+  nrisk2 = nrow(survTable),
+  events = ARTSurv$n.event
+)
+
+# I'll make a function for this later
+for(i in 2:nrow(datART)){
+  datART$nrisk2[i] <- datART$nrisk2[i-1] - datART$events[i-1]
+}
+
+datART <- datART %>% mutate(
+  surv = cumprod((nrisk-events)/nrisk),
+  surv2 = cumprod((nrisk2 - events)/nrisk2),
+  cumprob = 1-surv,
+  cumprob2 = 1- surv2,
+  followUp = time/year
+)
+
+dat2ART <- (data.frame(time = c(datART$followUp,datART$followUp),
+                       cumprob = c(datART$cumprob,datART$cumprob2),
+                       censoring = c(rep("Yes",nrow(datART)),rep("No",nrow(datART)))
+))
+
+ARTplot<- (ggplot(dat2ART, aes(time,cumprob,colour=censoring))
+           + geom_line() 
+           + ggtitle("I don't know what to name this")
+           + ylab("1 - S(t)")
+           + theme_bw()
+)
+
+print(ARTplot)
+
+quit()
 ### By enrolYear need to look at summary strata ARV(Yes or NO) -----
 
 arvYearSurv <- update(arvSurv, .~enrolYear)
