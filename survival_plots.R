@@ -21,26 +21,16 @@ linked <- linked %>% mutate(
   , followUp = time/year
 )
 
-print(plot(laSurv,mark.time=TRUE,main='Linked Survival: Enrolling in program (getting check up)',xlab='Day Lag'))
-
-print(plot(laSurv,mark.time=TRUE
-           , main='Linked Survival: Enrolling in program (getting check up)'
-           , xlab='Day Lag'
-           , fun = function(x){1-x}
-           )
-      )
-
-
 print(ggplot(linked, aes(followUp, cumprob))
-      + xlab("Follow-up years")
+      + xlab("Lags (years)")
       + ylab("Survival Probaiblity")
       + geom_line()
-      + ggtitle('Survival while linked to care')
+      + ggtitle('Lost to Follow Up Through Time')
       + ylim(c(0, 1))
       + theme_bw()
 )
 
-
+quit()
 
 # ARV treatment (Yes or No) ----
 
