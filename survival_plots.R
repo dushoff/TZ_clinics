@@ -4,19 +4,19 @@ library(dplyr)
 
 ### Linked and Alive----
 
-LASurv <- survfit(
+Linked <- survfit(
   Surv(followTime, LTFU_status) ~ 1
   , data=survTable
 )
 
-datLA <- data.frame(
-  time = LASurv$time,
-  nrisk = LASurv$n.risk,
+datLA <- with(Linked, data.frame(
+  time = time,
+  nrisk = n.risk,
   nrisk2 = nrow(survTable),
-  events = LASurv$n.event
-)
+  events = n.event
+))
 
-# I'll make a function for this later
+# I'll make a function for this later (just use cumsum and do it in one step)
 for(i in 2:nrow(datLA)){
   datLA$nrisk2[i] <- datLA$nrisk2[i-1] - datLA$events[i-1]
 }
@@ -27,19 +27,18 @@ datLA <- datLA %>% mutate(
   followUp = time/year
 )
 
+# Do this with rbind
 dat2LA <- (data.frame(time = c(datLA$followUp,datLA$followUp),
                        surv = c(datLA$surv,datLA$surv2),
                        censoring = c(rep("Yes",nrow(datLA)),rep("No",nrow(datLA)))
 ))
 
-LAplot<- (ggplot(dat2LA, aes(time,surv,colour=censoring))
-           + geom_line() 
-           + ggtitle("Eligibility Through Time")
-           + ylab("S(t)")
-           + theme_bw()
+print (ggplot(dat2LA, aes(time,surv,colour=censoring))
+	+ geom_line() 
+	+ ggtitle("Proportion linked")
+	+ ylab("S(t)")
+	+ theme_bw()
 )
-
-print(LAplot)
 
 # Eligible for ART (Yes or No) ----
 
@@ -73,14 +72,12 @@ dat2ELI <- (data.frame(time = c(datELI$followUp,datELI$followUp),
                         censoring = c(rep("Yes",nrow(datELI)),rep("No",nrow(datELI)))
 ))
 
-ELIplot<- (ggplot(dat2ELI, aes(time,cumprob,colour=censoring))
+print(ggplot(dat2ELI, aes(time,cumprob,colour=censoring))
       + geom_line() 
       + ggtitle("Eligibility Through Time")
       + ylab("1 - S(t)")
       + theme_bw()
 )
-
-print(ELIplot)
 
 ## ART (Yes or No) ----
 
@@ -166,7 +163,7 @@ print(ARTcoxfull)
 
 
 ## Linked by Gender ----
-LAsexSurv <- update(LASurv,.~sex_baseline)
+LAsexSurv <- update(Linked,.~sex_baseline)
 
 datLAsex <- data.frame(
   time = summary(LAsexSurv)$time,
