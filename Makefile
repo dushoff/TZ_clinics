@@ -18,7 +18,8 @@ tables.Rout: keep.visits.Rout tables.R
 
 # make files
 
-Sources = Makefile .gitignore README.md
+Sources = Makefile .gitignore README.md stuff.mk
+include stuff.mk
 
 Outside = children_visits.RData
 dushoff_update:
