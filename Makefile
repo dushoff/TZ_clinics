@@ -5,15 +5,6 @@ target pngtarget pdftarget vtarget acrtarget: survival_plots.sample.Rout
 
 ##################################################################
 
-msrepo = https://github.com/dushoff
-
-gitroot = ../
--include local.mk
--include $(gitroot)/local.mk
-ms = $(gitroot)/makestuff
-
-##################################################################
-
 tables.Rout: keep.visits.Rout tables.R
 
 # make files
@@ -41,17 +32,3 @@ Sources += Eligibility.mkd notes.txt todo.mkd
 -include $(ms)/visual.mk
 -include $(ms)/wrapR.mk
 # -include oldlatex.mk
-
-### Makestuff
-
-Makefile: libR.makestuff
-testfile: new.makestuff
-
-%.makestuff:
-	-cd $(dir $(ms)) && mv -f $(notdir $(ms)) .$(notdir $(ms))
-	cd $(dir $(ms)) && git clone $(msrepo)/$(notdir $(ms)).git
-	-cd $(dir $(ms)) && rm -rf .$(notdir $(ms))
-	touch $@
-
-$(ms): 
-	cd $(dir $(ms)) && git clone $(msrepo)/$(notdir $(ms)).git
