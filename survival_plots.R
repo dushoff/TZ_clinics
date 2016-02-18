@@ -2,34 +2,44 @@ library(survival)
 library(ggplot2)
 library(dplyr)
 
-### Linked and Alive... for this section we don't even care about ART, simply coming to get checkup----
+### Linked and Alive----
 
-laSurv <- survfit(
+LASurv <- survfit(
   Surv(followTime, LTFU_status) ~ 1
   , data=survTable
 )
 
-linked <- data.frame(
-  time=laSurv$time
-  , nrisk= laSurv$n.risk
-  , linkedcount= laSurv$n.event
+datLA <- data.frame(
+  time = LASurv$time,
+  nrisk = LASurv$n.risk,
+  nrisk2 = nrow(survTable),
+  events = LASurv$n.event
 )
 
-linked <- linked %>% mutate(
-  surv = cumprod((nrisk-linkedcount)/nrisk)
-  , cumprob = 1 - surv
-  , followUp = time/year
+# I'll make a function for this later
+for(i in 2:nrow(datLA)){
+  datLA$nrisk2[i] <- datLA$nrisk2[i-1] - datLA$events[i-1]
+}
+
+datLA <- datLA %>% mutate(
+  surv = cumprod((nrisk-events)/nrisk),
+  surv2 = cumprod((nrisk2 - events)/nrisk2),
+  followUp = time/year
 )
 
-print(ggplot(linked, aes(followUp, surv))
-      + xlab("Lags (years)")
-      + ylab("Survival Probaiblity")
-      + geom_line()
-      + ggtitle('Lost to Follow Up Through Time')
-      + ylim(c(0, 1))
-      + theme_bw()
+dat2LA <- (data.frame(time = c(datLA$followUp,datLA$followUp),
+                       surv = c(datLA$surv,datLA$surv2),
+                       censoring = c(rep("Yes",nrow(datLA)),rep("No",nrow(datLA)))
+))
+
+LAplot<- (ggplot(dat2LA, aes(time,surv,colour=censoring))
+           + geom_line() 
+           + ggtitle("Eligibility Through Time")
+           + ylab("S(t)")
+           + theme_bw()
 )
 
+print(LAplot)
 
 # Eligible for ART (Yes or No) ----
 
@@ -65,12 +75,13 @@ dat2ELI <- (data.frame(time = c(datELI$followUp,datELI$followUp),
 
 ELIplot<- (ggplot(dat2ELI, aes(time,cumprob,colour=censoring))
       + geom_line() 
-      + ggtitle("I don't know what to name this")
+      + ggtitle("Eligibility Through Time")
       + ylab("1 - S(t)")
       + theme_bw()
 )
 
 print(ELIplot)
+
 ## ART (Yes or No) ----
 
 ARTSurv <- survfit(
@@ -105,152 +116,91 @@ dat2ART <- (data.frame(time = c(datART$followUp,datART$followUp),
 
 ARTplot<- (ggplot(dat2ART, aes(time,cumprob,colour=censoring))
            + geom_line() 
-           + ggtitle("I don't know what to name this")
+           + ggtitle("ART Through Time")
            + ylab("1 - S(t)")
+           + xlab("Time in Years")
            + theme_bw()
 )
 
 print(ARTplot)
 
-quit()
-### By enrolYear need to look at summary strata ARV(Yes or NO) -----
+## LA coxph semi-full model ----
 
-arvYearSurv <- update(arvSurv, .~enrolYear)
-summary(arvYearSurv)
-print(arvYearSurv)
-
-
-arvpsm <- psm(
-  Surv(arvFollowTime, arv_ever) ~ 1
+LAcoxfull <- (coxph(
+  Surv(followTime, LTFU_status) ~ factor(sex_baseline) 
+                                + as.numeric(age_baseline) 
+                     #           + cd4_baseline
+                                + enrolYear
+                                + eligible_ever
+                                + arv_ever
   , data=survTable
-)
-
-print(arvpsm)
-
-arvYearpsm <- psm(
-  Surv(arvFollowTime, arv_ever) ~ enrolYear
-  , data=survTable
-)
-
-print(arvYearpsm)
-# plot(arvYearPH)
-summary(arvYearPH)
-print(arvYearPH)
-anova(arvYearPH, arvPH)
-
-arvYear <- with(arvYearSurv,data.frame(
-  time=time, 
-  nrisk = nstrata(n.risk,strata) , 
-  yr = catstrata(strata),
-  arvcount= n.event
 ))
 
-arvYear <- arvYear %>% 
-  group_by(yr) %>%  
-  mutate(
-    surv = cumprod((nrisk-arvcount)/nrisk),
-    cumprob = 1-surv,
-    followUp = time/year
-  )
-yr <- unique(arvYear$yr)
-print(plot(arvYearSurv,mark.time = FALSE,main='Survival by Year: Getting ARV and delay',xlab="day lag",col=yr))
+print(LAcoxfull)
 
-print(ggplot(arvYear, aes(followUp,cumprob,col=factor(yr),group=yr))
-      + geom_line() 
-      + ggtitle('Cumulative Probability of getting ART (POPULATION) by Year')
-)
+## ELI coxph semi-full model ----
 
-# still in the program (coming to check up, by year) ----
-
-linkedyearSurv <- update(laSurv,.~enrolYear)
-#plot(linkedyearSurv, mark.time=FALSE)
-
-
-linkedyear <- with(linkedyearSurv,data.frame(
-  time=time, 
-  nrisk = nstrata(n.risk,strata),
-  yr = catstrata(strata),
-  linkedcount= n.event
+ELIcoxfull <- (coxph(
+  Surv(eligibleTime, eligible_ever) ~ factor(sex_baseline) 
+  + as.numeric(age_baseline) 
+  #           + cd4_baseline
+  + enrolYear
+  + arv_ever
+  , data=survTable
 ))
 
-linkedyear <- linkedyear %>% 
-  group_by(yr) %>%  
-  mutate(
-    surv = cumprod((nrisk-linkedcount)/nrisk),
-    cumprob = 1-surv,
-    followUp = time/year
-  )
+print(ELIcoxfull)
 
-plot(linkedyearSurv, mark.time=FALSE,main="Survival Linked by Year: Enrolling in program (getting check up)",col=yr)
+## ART coxph semi-full model ----
+
+ARTcoxfull <- (coxph(
+  Surv(arvFollowTime, arv_ever) ~ factor(sex_baseline) 
+  + as.numeric(age_baseline) 
+  #           + cd4_baseline
+  + enrolYear
+  + eligible_ever
+  , data=survTable
+))
+
+print(ARTcoxfull)
 
 
-print(ggplot(linkedyear, aes(followUp,cumprob,col=factor(yr),group=yr))
-      + geom_line() 
-      + ggtitle('Cumulative Probability of population still in the program by Year')
+## Linked and Gender ----
+LAsexSurv <- update(LASurv,.~sex_baseline)
+
+datLAsex <- data.frame(
+  time = summary(LAsexSurv)$time,
+  nrisk = summary(LAsexSurv)$n.risk,
+  events = summary(LAsexSurv)$n.event,
+  gender = summary(LAsexSurv)$strata
 )
 
-# stuff we didn't do yet ------
-quit()
 
-arvYearsum <- summary(arvYearSurv)
-
-arvYear <- data.frame(time=arvYearsum$time,
-                      Year= arvYearsum$strata,
-                      yearcount = arvYearsum$n.event,
-                      n = sum(arvYearSurv$n),
-                      nart = sum(arvYearSurv$n.event))
-
-arvYear <- arvYear %>% group_by(Year) %>%	mutate(probpop = yearcount/n,
-                                                 probart = yearcount/nart,
-                                                 cumprobpop = cumsum(probpop),
-                                                 cumprobart = cumsum(probart),
-                                                 followUp = time/year)
-
-ggplot(arvYear, aes(followUp, cumprobpop, group=Year, colour=Year )) + geom_line() +
-  ggtitle('Cumulative Probability of ART Start by Enrolment Year (POPULATION)') + xlab("Follow-up in Years") + ylab("Probability")
-
-ggplot(arvYear, aes(followUp, cumprobart, group=Year, colour=Year )) + geom_line() + 
-  ggtitle('Cumulative Probability of ART Start by Enrolment Year (ART)') + xlab("Follow-up in Years") + ylab("Probability")
-
-
-linkedyearSurv <- update(laSurv,.~enrolYear)
-linkedyearsum <- summary(linkedyearSurv)
-
-linkedyear <- data.frame(time=linkedyearsum$time
-                         , Year= linkedyearsum$strata
-                         , yearcount = linkedyearsum$n.event
-                         , n = sum(linkedyearSurv$n)
-                         , nlinked = sum(linkedyearSurv$n.event)
+datLAsex <- datLAsex %>% mutate(
+  surv = cumprod((nrisk-events)/nrisk),
+  followUp = time/year
 )
 
-linkedyear <- linkedyear %>% group_by(Year) %>%	mutate(probpop = yearcount/n,
-                                                       problinked = yearcount/nlinked,
-                                                       cumprobpop = cumsum(probpop),
-                                                       cumproblinked = cumsum(problinked),
-                                                       followUp = time/year)
+datLAsex <- (datLAsex 
+            %>% group_by(gender)
+            %>% mutate(
+              surv = cumprod((nrisk-events)/nrisk),
+              followUp = time/year
+            )
+)
 
-ggplot(linkedyear,
-       aes(followUp, cumprobpop, group=Year, colour=Year ))
-+ geom_line()
-+ ggtitle('Cumulative Probability of Linked by Enrolment Year (POPULATION)')
-+ xlab("Follow-up in Years") + ylab("Probability")
+#datLAsex <- datLAsex %>% mutate(sex = ifelse(gender == 1, "Male","Female"))
 
-ggplot(linkedyear, aes(followUp, cumproblinked, group=Year, colour=Year )) + geom_line() + 
-  ggtitle('Cumulative Probability of Linked by Enrolment Year (Linked)') + xlab("Follow-up in Years") + ylab("Probability")
 
-# 
-# testing <- merge(arv,arvYear, by="time")
-# head(testing)
-# testing <- testing %>% group_by(year) %>% 
-#	 mutate(ratio = event.per.year/event,
-#					cumratio = cumsum(event.per.year)/cumsum(event))
-# 
-# head(testing)
-# 
-# ggplot(testing, aes(time, cumratio, group=year,colour=year)) + geom_line() + 
-# ##Linked and Alive
-# 
-# SurvEnrol <- survfit(Surv(templast - as.numeric(startdate), templast >= endDate) ~ 1,data=survTable)
-# plot(SurvEnrol, conf.int=FALSE, xlab = "Time", ylab = "Survival Probability", main = "Linked and Alive")
-# 
-# arvYearmod
+LAsexplot<- (ggplot(datLAsex, aes(followUp,surv,colour=gender))
+          + geom_line() 
+          + ggtitle("LTFU Through Time by gender")
+          + ylab("S(t)")
+          + theme_bw()
+)
+
+print(LAsexplot)
+
+
+
+

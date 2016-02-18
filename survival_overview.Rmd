@@ -157,11 +157,11 @@ print(g2)
 ### WHO Policy Change
 
 - Age (first visit seems to be the easiest)
-- Year of Enrollment (diddo)
+- Year of Enrollment (ditto)
 
 ### Biological
 
-- CD4 (diddo)
+- CD4 (ditto)
 - others (help me out guys)
 
 ## Incorperating Gender 
