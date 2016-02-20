@@ -2,131 +2,79 @@ library(survival)
 library(ggplot2)
 library(dplyr)
 
+censoringDAT <- function(x){
+  tempdf <- with(x, data.frame(
+    time = time,
+    events = n.event,
+    nrisk = n.risk,
+    nrisk2 = nrow(survTable)+first(n.event[n.event>0])-cumsum(n.event)
+  ))
+  
+  cendf <- tempdf %>% transmute(
+    time = time/year,
+    surv = cumprod((nrisk-events)/nrisk),
+    cumprob = 1-surv,
+    censoring = "Yes"
+  )
+  
+  uncendf <- tempdf %>% transmute(
+    time = time/year,
+    surv = cumprod((nrisk2-events)/nrisk2),
+    cumprob = 1-surv,
+    censoring = "No"
+  )
+  return(rbind(cendf,uncendf))
+}
+
 ### Linked and Alive----
 
 Linked <- survfit(
   Surv(followTime, LTFU_status) ~ 1
   , data=survTable
 )
-# JD suggest we should use cumsum, I understand it works, but need a small hack
-# The fastest hack is nrisk2 = nrow(survTable) +  *first non-zero event* - cumsum(.)
-# datLA <- with(Linked, data.frame(
-#   time = time,
-#   events = n.event,
-#   nrisk = n.risk,
-#   nrisk2 = nrow(survTable)-cumsum(n.event)
-# ))
 
-datLA <- with(Linked, data.frame(
-  time = time,
-  events = n.event,
-  nrisk = n.risk,
-  nrisk2 = nrow(survTable)
-))
-# I'll make a function for this later (just use cumsum and do it in one step)
-for(i in 2:nrow(datLA)){
-  datLA$nrisk2[i] <- datLA$nrisk2[i-1] - datLA$events[i-1]
-}
+LinkedDF <- censoringDAT(Linked)
 
-datLA <- datLA %>% mutate(
-  surv = cumprod((nrisk-events)/nrisk),
-  surv2 = cumprod((nrisk2 - events)/nrisk2),
-  followUp = time/year
-)
-
-# Do this with rbind
-dat2LA <- (data.frame(time = c(datLA$followUp,datLA$followUp),
-                       surv = c(datLA$surv,datLA$surv2),
-                       censoring = c(rep("Yes",nrow(datLA)),rep("No",nrow(datLA)))
-))
-
-print (ggplot(dat2LA, aes(time,surv,colour=censoring))
+print (ggplot(LinkedDF, aes(time,surv,colour=censoring))
 	+ geom_line() 
 	+ ggtitle("Proportion linked")
-	+ ylab("S(t)")
+	+ ylab("Probability")
 	+ theme_bw()
 )
 
 # Eligible for ART (Yes or No) ----
 
-ELISurv <- survfit(
-  Surv(eligibleTime, eligible_ever, type= "right") ~ 1
+Eligible <- survfit(
+  Surv(eligibleTime, eligible_ever) ~ 1
   , data=survTable
 )
 
-datELI <- data.frame(
-  time = ELISurv$time,
-  nrisk = ELISurv$n.risk,
-  nrisk2 = nrow(survTable),
-  events = ELISurv$n.event
-)
+EligibleDF <- censoringDAT(Eligible)
 
-# I'll make a function for this later
-for(i in 2:nrow(datELI)){
-  datELI$nrisk2[i] <- datELI$nrisk2[i-1] - datELI$events[i-1]
-}
-
-datELI <- datELI %>% mutate(
-  surv = cumprod((nrisk-events)/nrisk),
-  surv2 = cumprod((nrisk2 - events)/nrisk2),
-  cumprob = 1-surv,
-  cumprob2 = 1- surv2,
-  followUp = time/year
-)
-
-dat2ELI <- (data.frame(time = c(datELI$followUp,datELI$followUp),
-                        cumprob = c(datELI$cumprob,datELI$cumprob2),
-                        censoring = c(rep("Yes",nrow(datELI)),rep("No",nrow(datELI)))
-))
-
-print(ggplot(dat2ELI, aes(time,cumprob,colour=censoring))
+print(ggplot(EligibleDF, aes(time,cumprob,colour=censoring))
       + geom_line() 
       + ggtitle("Eligibility Through Time")
-      + ylab("1 - S(t)")
+      + ylab("Probability")
       + theme_bw()
 )
 
 ## ART (Yes or No) ----
 
-ARTSurv <- survfit(
+ART <- survfit(
   Surv(arvFollowTime, arv_ever, type= "right") ~ 1
   , data=survTable
 )
 
-datART <- data.frame(
-  time = ARTSurv$time,
-  nrisk = ARTSurv$n.risk,
-  nrisk2 = nrow(survTable),
-  events = ARTSurv$n.event
-)
+ARTDF <- censoringDAT(ART)
 
-# I'll make a function for this later
-for(i in 2:nrow(datART)){
-  datART$nrisk2[i] <- datART$nrisk2[i-1] - datART$events[i-1]
-}
-
-datART <- datART %>% mutate(
-  surv = cumprod((nrisk-events)/nrisk),
-  surv2 = cumprod((nrisk2 - events)/nrisk2),
-  cumprob = 1-surv,
-  cumprob2 = 1- surv2,
-  followUp = time/year
-)
-
-dat2ART <- (data.frame(time = c(datART$followUp,datART$followUp),
-                       cumprob = c(datART$cumprob,datART$cumprob2),
-                       censoring = c(rep("Yes",nrow(datART)),rep("No",nrow(datART)))
-))
-
-ARTplot<- (ggplot(dat2ART, aes(time,cumprob,colour=censoring))
+print(ggplot(ARTDF, aes(time,cumprob,colour=censoring))
            + geom_line() 
            + ggtitle("ART Through Time")
-           + ylab("1 - S(t)")
+           + ylab("Probability")
            + xlab("Time in Years")
            + theme_bw()
 )
 
-print(ARTplot)
 
 ## LA coxph semi-full model ----
 
