@@ -8,14 +8,21 @@ Linked <- survfit(
   Surv(followTime, LTFU_status) ~ 1
   , data=survTable
 )
+# JD suggest we should use cumsum, I understand it works, but need a small hack
+# The fastest hack is nrisk2 = nrow(survTable) +  *first non-zero event* - cumsum(.)
+# datLA <- with(Linked, data.frame(
+#   time = time,
+#   events = n.event,
+#   nrisk = n.risk,
+#   nrisk2 = nrow(survTable)-cumsum(n.event)
+# ))
 
 datLA <- with(Linked, data.frame(
   time = time,
+  events = n.event,
   nrisk = n.risk,
-  nrisk2 = nrow(survTable),
-  events = n.event
+  nrisk2 = nrow(survTable)
 ))
-
 # I'll make a function for this later (just use cumsum and do it in one step)
 for(i in 2:nrow(datLA)){
   datLA$nrisk2[i] <- datLA$nrisk2[i-1] - datLA$events[i-1]
