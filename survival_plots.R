@@ -2,6 +2,7 @@ library(survival)
 library(ggplot2)
 library(dplyr)
 
+## helper functions ----
 censoringDAT <- function(x){
   tempdf <- with(x, data.frame(
     time = time,
@@ -46,7 +47,7 @@ strataDAT <- function(x){
   return(tempdf)
 }
 
-### Linked and Alive----
+### Linked----
 
 Linked <- survfit(
   Surv(followTime, LTFU_status) ~ 1
@@ -62,7 +63,7 @@ print (ggplot(LinkedDF, aes(time,surv,colour=censoring))
 	+ theme_bw()
 )
 
-# Eligible for ART (Yes or No) ----
+# Eligible(Yes or No) ----
 
 Eligible <- survfit(
   Surv(eligibleTime, eligible_ever) ~ 1
@@ -108,6 +109,47 @@ print(ggplot(LinkedSexDF, aes(followUp,surv,colour=strata))
           + theme_bw()
 )
 
+## Linked by Enrollment Year
+
+LinkedYear <- update(Linked,.~enrolYear)
+
+LinkedYearDF <- strataDAT(LinkedYear)
+
+print(ggplot(LinkedYearDF, aes(followUp,surv,colour=strata))
+      + geom_line() 
+      + ggtitle("LTFU Through Time by Enrollment Year")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
+
+## Linked by Agecat 1 ----
+
+LinkedAgecat1 <- update(Linked,.~agecat1)
+
+LinkedAgecat1 <- strataDAT(LinkedAgecat1)
+
+print(ggplot(LinkedAgecat1, aes(followUp,surv,colour=strata))
+      + geom_line() 
+      + ggtitle("LTFU Through Time by Agecat1")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
+
+## Linked by Agecat 2 ----
+
+LinkedAgecat2 <- update(Linked,.~agecat2)
+
+LinkedAgecat2 <- strataDAT(LinkedAgecat2)
+
+print(ggplot(LinkedAgecat2, aes(followUp,surv,colour=strata))
+      + geom_line() 
+      + ggtitle("LTFU Through Time by Agecat2")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
 
 ## ART by Gender ----
 ARTSex <- update(ART,.~sex_baseline)
