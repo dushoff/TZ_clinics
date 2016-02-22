@@ -151,6 +151,20 @@ print(ggplot(LinkedAgecat2, aes(followUp,surv,colour=strata))
       + theme_bw()
 )
 
+## Linked by Health Facility ----
+
+LinkedHF <- update(Linked,.~hf_type_baseline)
+
+LinkedHF <- strataDAT(LinkedHF)
+
+print(ggplot(LinkedHF, aes(followUp,surv,colour=strata))
+      + geom_line() 
+      + ggtitle("LTFU Through Time by HF")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
+
 ## ART by Gender ----
 ARTSex <- update(ART,.~sex_baseline)
 
@@ -200,6 +214,21 @@ ARTAgecat2 <- strataDAT(ARTAgecat2)
 print(ggplot(ARTAgecat2, aes(followUp,cumprob,colour=strata))
       + geom_line() 
       + ggtitle("ART by Agecat2")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
+
+
+## ART by Health Facility ----
+
+ARTHF <- update(ART,.~hf_type_baseline)
+
+ARTHF <- strataDAT(ARTHF)
+
+print(ggplot(ARTHF, aes(followUp,cumprob,colour=strata))
+      + geom_line() 
+      + ggtitle("ART by HF")
       + ylab("Probability")
       + xlab("Year Lag")
       + theme_bw()
