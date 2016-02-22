@@ -55,9 +55,9 @@ survTable <- (patientTable %>%
 		, enrolTotal = endDate-as.numeric(minDate)
 		, enrolYear = format(minDate, "%Y")
 		, real_age = minDate-dateofbirth_first
-		, agecat1 = catage1(real_age)
-		, agecat2 = catage2(real_age)
- 		, agecatE1 = catageE1(real_age)
- 		, agecatE2 = catageE2(real_age)
+		, agecatA = catage1(real_age)
+		, agecatB = catage2(real_age)
+ 		, agecatEA = catageE1(real_age)
+ 		, agecatEB = catageE2(real_age)
 	)
 )

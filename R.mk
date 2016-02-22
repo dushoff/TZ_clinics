@@ -51,8 +51,11 @@ survival.sample.Rout: survival.R
 survival.%.Rout: patientTable.%.Rout dplyr.Rlib.R rgb.R survival.R
 	$(run-R)
 
-survival_plots.sample.Rout: survival.sample.Rout survival_plots.R
-
 Sources += survival_plots.R 
-survival_plots.%.Rout:	    survival.%.Rout survival_plots.R
-			    $(run-R)
+survival_plots.%.Rout: survival.%.Rout survival_plots.R
+		       $(run-R)
+
+
+Sources += coxph.R 
+coxph.%.Rout: survival.%.Rout coxph.R
+	      $(run-R)

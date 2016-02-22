@@ -82,7 +82,7 @@ print(ggplot(EligibleDF, aes(time,cumprob,colour=censoring))
 ## ART (Yes or No) ----
 
 ART <- survfit(
-  Surv(arvFollowTime, arv_ever, type= "right") ~ 1
+  Surv(arvFollowTime, arv_ever) ~ 1
   , data=survTable
 )
 
@@ -97,7 +97,7 @@ print(ggplot(ARTDF, aes(time,cumprob,colour=censoring))
 )
 
 ## Linked by Gender ----
-LinkedSex <- update(Linked,.~sex_baseline)
+LinkedSex <- update(Linked,.~sex_first)
 
 LinkedSexDF <- strataDAT(LinkedSex)
 
@@ -125,13 +125,13 @@ print(ggplot(LinkedYearDF, aes(followUp,surv,colour=strata))
 
 ## Linked by Agecat 1 ----
 
-LinkedAgecat1 <- update(Linked,.~agecat1)
+LinkedAgecatA <- update(Linked,.~agecatA)
 
-LinkedAgecat1 <- strataDAT(LinkedAgecat1)
+LinkedAgecatA <- strataDAT(LinkedAgecatA)
 
-print(ggplot(LinkedAgecat1, aes(followUp,surv,colour=strata))
+print(ggplot(LinkedAgecatA, aes(followUp,surv,colour=strata))
       + geom_line() 
-      + ggtitle("LTFU Through Time by Agecat1")
+      + ggtitle("LTFU Through Time by AgecatA")
       + ylab("Probability")
       + xlab("Year Lag")
       + theme_bw()
@@ -139,13 +139,13 @@ print(ggplot(LinkedAgecat1, aes(followUp,surv,colour=strata))
 
 ## Linked by Agecat 2 ----
 
-LinkedAgecat2 <- update(Linked,.~agecat2)
+LinkedAgecatB <- update(Linked,.~agecatB)
 
-LinkedAgecat2 <- strataDAT(LinkedAgecat2)
+LinkedAgecatB <- strataDAT(LinkedAgecatB)
 
-print(ggplot(LinkedAgecat2, aes(followUp,surv,colour=strata))
+print(ggplot(LinkedAgecatB, aes(followUp,surv,colour=strata))
       + geom_line() 
-      + ggtitle("LTFU Through Time by Agecat2")
+      + ggtitle("LTFU Through Time by AgecatB")
       + ylab("Probability")
       + xlab("Year Lag")
       + theme_bw()
@@ -153,7 +153,7 @@ print(ggplot(LinkedAgecat2, aes(followUp,surv,colour=strata))
 
 ## Linked by Health Facility ----
 
-LinkedHF <- update(Linked,.~hf_type_baseline)
+LinkedHF <- update(Linked,.~hf_type_first)
 
 LinkedHF <- strataDAT(LinkedHF)
 
@@ -166,7 +166,7 @@ print(ggplot(LinkedHF, aes(followUp,surv,colour=strata))
 )
 
 ## ART by Gender ----
-ARTSex <- update(ART,.~sex_baseline)
+ARTSex <- update(ART,.~sex_first)
 
 ARTSexDF <- strataDAT(ARTSex)
 
@@ -193,13 +193,13 @@ print(ggplot(ARTYearDF, aes(followUp,cumprob,colour=strata))
 
 ## ART by Agecat 1 ----
 
-ARTAgecat1 <- update(ART,.~agecat1)
+ARTAgecatA <- update(ART,.~agecatA)
 
-ARTAgecat1 <- strataDAT(ARTAgecat1)
+ARTAgecatA <- strataDAT(ARTAgecatA)
 
-print(ggplot(ARTAgecat1, aes(followUp,cumprob,colour=strata))
+print(ggplot(ARTAgecatA, aes(followUp,cumprob,colour=strata))
       + geom_line() 
-      + ggtitle("ART by Agecat1")
+      + ggtitle("ART by AgecatA")
       + ylab("Probability")
       + xlab("Year Lag")
       + theme_bw()
@@ -207,13 +207,13 @@ print(ggplot(ARTAgecat1, aes(followUp,cumprob,colour=strata))
 
 ## ART by Agecat 2 ----
 
-ARTAgecat2 <- update(ART,.~agecat2)
+ARTAgecatB <- update(ART,.~agecatB)
 
-ARTAgecat2 <- strataDAT(ARTAgecat2)
+ARTAgecatB <- strataDAT(ARTAgecatB)
 
-print(ggplot(ARTAgecat2, aes(followUp,cumprob,colour=strata))
+print(ggplot(ARTAgecatB, aes(followUp,cumprob,colour=strata))
       + geom_line() 
-      + ggtitle("ART by Agecat2")
+      + ggtitle("ART by AgecatB")
       + ylab("Probability")
       + xlab("Year Lag")
       + theme_bw()
@@ -222,7 +222,7 @@ print(ggplot(ARTAgecat2, aes(followUp,cumprob,colour=strata))
 
 ## ART by Health Facility ----
 
-ARTHF <- update(ART,.~hf_type_baseline)
+ARTHF <- update(ART,.~hf_type_first)
 
 ARTHF <- strataDAT(ARTHF)
 
