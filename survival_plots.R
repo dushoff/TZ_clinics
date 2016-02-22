@@ -177,3 +177,30 @@ print(ggplot(ARTYearDF, aes(followUp,cumprob,colour=strata))
               + theme_bw()
 )
 
+## ART by Agecat 1 ----
+
+ARTAgecat1 <- update(ART,.~agecat1)
+
+ARTAgecat1 <- strataDAT(ARTAgecat1)
+
+print(ggplot(ARTAgecat1, aes(followUp,cumprob,colour=strata))
+      + geom_line() 
+      + ggtitle("ART by Agecat1")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
+
+## ART by Agecat 2 ----
+
+ARTAgecat2 <- update(ART,.~agecat2)
+
+ARTAgecat2 <- strataDAT(ARTAgecat2)
+
+print(ggplot(ARTAgecat2, aes(followUp,cumprob,colour=strata))
+      + geom_line() 
+      + ggtitle("ART by Agecat2")
+      + ylab("Probability")
+      + xlab("Year Lag")
+      + theme_bw()
+)
