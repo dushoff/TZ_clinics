@@ -3,6 +3,7 @@ library(ggplot2)
 library(dplyr)
 
 ## helper functions ----
+## Modularize this, or get rid of it, or whatever
 censoringDAT <- function(x){
   tempdf <- with(x, data.frame(
     time = time,
@@ -39,7 +40,7 @@ pairwise_comp <- function(x,e1,e2){
     prevalence = prev[,2],
     event = e2
   ))
-  return(rbind(e1df,e2df))
+  r, or whatevereturn(rbind(e1df,e2df))
 }
 
 strataDAT <- function(x){
@@ -104,7 +105,7 @@ ARTDF <- censoringDAT(ART)
 
 print(ggplot(ARTDF, aes(time,cumprob,colour=censoring))
            + geom_line() 
-           + ggtitle("ART Through Time")
+           + ggtitle("ART Through Time (")
            + ylab("Probability")
            + xlab("Time in Years")
            + theme_bw()
