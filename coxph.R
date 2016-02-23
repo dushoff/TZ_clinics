@@ -115,4 +115,16 @@ print(summary(ARTAgeBHFcd4))
 print(anova(ARTAgeBHFcd4))
 print(drop1(ARTAgeBHFcd4,test = "Chisq"))
 
-
+# ## coxph competing risk ---- 
+# 
+# DL_status <- with(survTable,ifelse(death_ever,2*as.numeric(death_ever),as.numeric(LTFU_status)))
+# DL_delay <- with(survTable, ifelse(death_ever,death_delay,followTime))
+# DL_status <- factor(DL_status,0:2,labels=c("censor","LTFU","death"))
+# 
+# survTable$DL_status <- DL_status
+# survTable$DL_delay <- DL_delay
+# 
+# LDCRcph <- coxph(Surv(DL_delay,DL_status)~factor(sex_first)
+#                  + factor(enrolYear)
+#                  , data=survTable
+# )
