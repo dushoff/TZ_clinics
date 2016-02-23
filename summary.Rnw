@@ -40,7 +40,7 @@ load("survival.sample.RData")
 Before looking at getting onto ART, we want to check/see how many people are \textit{Linked} to the program. (ie. still observable/ coming in for check ups) We have to be very careful when we set it up and how to handle dead patients. Let's assume dead patients are \textbf{\textit{NOT AT RISK of getting LOST}}
 
 The old method does not handle dead patients properly, where we take,
-followTime  (\textbf{lastdate} $-$ \textbf{minDate}), and LTFUstatus wheather the patient is lost or not.
+followTime  (\textbf{lastdate} $-$ \textbf{minDate}), and LTFUstatus (lost or not).
 \begin{enumerate}
 \item lastdate: EndDate if they are not lost, followUp date if they are lost
 \item followUp date: Last observation date $+$ half a year
