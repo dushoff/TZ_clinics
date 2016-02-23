@@ -1,0 +1,68 @@
+\documentclass{article}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{alltt}
+\usepackage[utf8]{inputenc} % for accented characters
+%% stuff for editing
+%\usepackage[markup=nocolor,addedmarkup=bf,deletedmarkup=sout]{changes}
+%% to suppress notes & comments: \usepackage[final]{changes}
+\usepackage[backgroundcolor=lightgray,textsize=tiny]{todonotes}
+\usepackage{setspace}
+\bibliographystyle{chicago}
+\title{TZ_clinics}
+\author{Everyone}
+\date{\today}
+
+
+\begin{document}
+
+%\SweaveOpts{concordance=TRUE}
+%\SweaveOpts{concordance=TRUE}
+
+\doublespacing
+<<pkgs,message=FALSE,warning=FALSE,echo=FALSE>>=
+library("ggplot2"); theme_set(theme_bw())
+scale_colour_discrete <- function(...,palette="Set1")
+    scale_colour_brewer(...,palette=palette)
+scale_fill_discrete <- function(...,palette="Set1")
+    scale_fill_brewer(...,palette=palette)
+zmargin <- theme(panel.margin=grid::unit(0,"lines"))
+library("knitr")
+opts_chunk$set(fig.width=6,fig.height=4)
+library("plyr")
+library("dplyr")
+library("survival")
+load("survival.sample.RData")
+@
+
+\section{Linked}
+
+Before looking at getting onto ART, we want to check/see how many people are \textit{Linked} to the program. (ie. still observable/ coming in for check ups) We have to be very careful when we set it up and how to handle dead patients. Let's assume dead patients are \textbf{\textit{NOT AT RISK of getting LOST}}
+
+The old method does not handle dead patients properly, where we take,
+followTime  (\textbf{lastdate} $-$ \textbf{minDate}), and LTFUstatus wheather the patient is lost or not.
+\begin{enumerate}
+\item lastdate: EndDate if they are not lost, followUp date if they are lost
+\item followUp date: Last observation date $+$ half a year
+\item minDate: first visit date
+\end{enumerate}
+
+I am going to overwrite/create new lost status. 
+
+<<Linked, message=FALSE,warning=FALSE>>=
+
+survTable <- survTable %>% 
+  mutate(lost_status = ifelse(death_ever,FALSE,LTFU_status)
+         , lost_delay = ifelse(death_ever, death_delay, followTime))
+
+Linked <- survfit(
+  Surv(lost_delay, lost_status)~ 1
+  , data = survTable)
+
+plot(Linked,mark.time=FALSE)
+
+@
+
+
+
+\end{document}
