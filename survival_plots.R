@@ -272,6 +272,8 @@ DA_delay <- with(survTable,ifelse(death_ever,death_delay,arvFollowTime))
 DA_status <- factor(DA_status,0:2,labels=c("censor","ART","death"))
 
 DAcomp <- survfit(Surv(DA_delay,DA_status)~1,data=survTable)
+## The numbers are not adding up FIXME
+## testing <- survTable %>% select(c(arv_ever,arv_status_delay,arv_diff))
 
 DAdf <- pairwise_comp(summary(DAcomp),"ART","Dead")
 
@@ -289,5 +291,46 @@ AD_delay <- with(survTable,ifelse(arv_ever,arvFollowTime,death_delay))
 AD_status <- factor(AD_status,0:2,labels=c("censor","death","ART"))
 
 ADcomp <- survfit(Surv(AD_delay,AD_status)~1,data=survTable)
-ADcomp
+ADdf <- pairwise_comp(summary(ADcomp),"Dead","ART")
 
+print(ggplot(ADdf, aes(time,prevalence,colour=event))
+      + geom_line() 
+      + ggtitle("Competing risk AD Through Time")
+      + ylab("Prevalence")
+      + xlab("Day Lag")
+      + theme_bw()
+)
+
+AL_status <- with(survTable,ifelse(arv_ever,2*as.numeric(arv_ever),as.numeric(LTFU_status)))
+AL_delay <- with(survTable, ifelse(arv_ever,arvFollowTime,followTime))
+AL_status <- factor(AL_status,0:2,labels=c("censor","LTFU","ART"))
+
+ALcomp <- survfit(Surv(AL_delay,AL_status)~1,data=survTable)
+ALcomp
+
+ALdf <- pairwise_comp(summary(ALcomp),"LTFU","ART")
+
+print(ggplot(ALdf, aes(time,prevalence,colour=event))
+      + geom_line() 
+      + ggtitle("Competing risk AL Through Time")
+      + ylab("Prevalence")
+      + xlab("Day Lag")
+      + theme_bw()
+)
+
+LA_status <- with(survTable,ifelse(LTFU_status,2*as.numeric(LTFU_status),as.numeric(arv_ever)))
+LA_delay <- with(survTable, ifelse(LTFU_status,followTime,arvFollowTime))
+LA_status <- factor(LA_status,0:2,labels=c("censor","ART","LTFU"))
+
+LAcomp <- survfit(Surv(LA_delay,LA_status)~1,data=survTable)
+LAcomp
+
+LAdf <- pairwise_comp(summary(LAcomp),"LTFU","ART")
+
+print(ggplot(LAdf, aes(time,prevalence,colour=event))
+      + geom_line() 
+      + ggtitle("Competing risk LA Through Time")
+      + ylab("Prevalence")
+      + xlab("Day Lag")
+      + theme_bw()
+)
