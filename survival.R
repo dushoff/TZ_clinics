@@ -59,5 +59,7 @@ survTable <- (patientTable %>%
 		, agecatB = catage2(real_age)
  		, agecatEA = catageE1(real_age)
  		, agecatEB = catageE2(real_age)
+		, death_ever = !is.na(dateofdeath_first)
+		, death_delay = ifelse(death_ever,dateofdeath_first - minDate + 1,followTime)
 	)
 )

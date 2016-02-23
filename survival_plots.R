@@ -27,6 +27,20 @@ censoringDAT <- function(x){
   return(rbind(cendf,uncendf))
 }
 
+pairwise_comp <- function(x,e1,e2){
+  e1df <- with(x, data.frame(
+    time = time,
+    prevalence = prev[,1],
+    event = e1
+  ))
+  
+  e2df <- with(x,data.frame(
+    time = time,
+    prevalence = prev[,2],
+    event = e2
+  ))
+  return(rbind(e1df,e2df))
+}
 
 strataDAT <- function(x){
   tempdat <- with(summary(x),data.frame(
@@ -233,3 +247,47 @@ print(ggplot(ARTHF, aes(followUp,cumprob,colour=strata))
       + xlab("Year Lag")
       + theme_bw()
 )
+
+## Pairwise competing risk ----
+
+DL_status <- with(survTable,ifelse(death_ever,2*as.numeric(death_ever),as.numeric(LTFU_status)))
+DL_delay <- with(survTable, ifelse(death_ever,death_delay,followTime))
+DL_status <- factor(DL_status,0:2,labels=c("censor","LTFU","death"))
+
+DLcomp <- survfit(Surv(DL_delay,DL_status)~1,data=survTable)
+DLcomp
+
+DLdf <- pairwise_comp(summary(DLcomp),"LTFU","Dead")
+
+print(ggplot(DLdf, aes(time,prevalence,colour=event))
+      + geom_line() 
+      + ggtitle("Competing risk DL Through Time")
+      + ylab("Prevalence")
+      + xlab("Day Lag")
+      + theme_bw()
+)
+
+DA_status <- with(survTable,ifelse(death_ever,2*as.numeric(death_ever),as.numeric(arv_ever)))
+DA_delay <- with(survTable,ifelse(death_ever,death_delay,arvFollowTime))
+DA_status <- factor(DA_status,0:2,labels=c("censor","ART","death"))
+
+DAcomp <- survfit(Surv(DA_delay,DA_status)~1,data=survTable)
+
+DAdf <- pairwise_comp(summary(DAcomp),"ART","Dead")
+
+print(ggplot(DAdf, aes(time,prevalence,colour=event))
+      + geom_line() 
+      + ggtitle("Competing risk DA Through Time")
+      + ylab("Prevalence")
+      + xlab("Day Lag")
+      + theme_bw()
+)
+
+
+AD_status <- with(survTable,ifelse(arv_ever,2*as.numeric(arv_ever),as.numeric(death_ever)))
+AD_delay <- with(survTable,ifelse(arv_ever,arvFollowTime,death_delay))
+AD_status <- factor(AD_status,0:2,labels=c("censor","death","ART"))
+
+ADcomp <- survfit(Surv(AD_delay,AD_status)~1,data=survTable)
+ADcomp
+
