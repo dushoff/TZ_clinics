@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: summary.pdf.now 
+target pngtarget pdftarget vtarget acrtarget: summary.pdf
 
 ##################################################################
 
@@ -31,4 +31,4 @@ Sources += Eligibility.mkd notes.txt todo.mkd
 
 -include $(ms)/visual.mk
 -include $(ms)/wrapR.mk
-# -include oldlatex.mk
+-include $(ms)/oldlatex.mk
