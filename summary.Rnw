@@ -32,37 +32,81 @@ opts_chunk$set(fig.width=6,fig.height=4)
 library("plyr")
 library("dplyr")
 library("survival")
-load("survival.sample.RData")
+load("survival_plots.sample.RData")
 @
 
-\section{Linked}
+\section{Linked and Alive}
 
 Before looking at getting onto ART, we want to check/see how many people are \textit{Linked} to the program. (ie. still observable/ coming in for check ups) We have to be very careful when we set it up and how to handle dead patients. Let's assume dead patients are \textbf{\textit{NOT AT RISK of getting LOST}}
 
 The old method does not handle dead patients properly, where we take,
-followTime  (\textbf{lastdate} $-$ \textbf{minDate}), and LTFUstatus (lost or not).
+\textbf{followTime}, and \textbf{LTFUstatus} (lost or not).
 \begin{enumerate}
+\item followTime: lastdate $-$ minDate
 \item lastdate: EndDate if they are not lost, followUp date if they are lost
 \item followUp date: Last observation date $+$ half a year
 \item minDate: first visit date
 \end{enumerate}
 
-I am going to overwrite/create new lost status. 
+I am going to overwrite/create new lost status. The event of interest is lost, and censored if they die, or reach end date.
 
 <<Linked, message=FALSE,warning=FALSE>>=
 
-survTable <- survTable %>% 
-  mutate(lost_status = ifelse(death_ever,FALSE,LTFU_status)
-         , lost_delay = ifelse(death_ever, death_delay, followTime))
+survTable <- (survTable %>% 
+  mutate(lost_status = ifelse(death_ever,
+                              FALSE,LTFU_status)
+         , lost_delay = ifelse(death_ever, 
+                               death_delay, followTime))
+)
 
 Linked <- survfit(
   Surv(lost_delay, lost_status)~ 1
   , data = survTable)
 
-plot(Linked,mark.time=FALSE)
+LinkedDF <- survDF(Linked)
+
+print(ggplot(LinkedDF, aes(time,surv))
+	+ geom_line() 
+	+ ggtitle("Proportion Linked and Alive")
+	+ ylab("Probability")
+	+ theme_bw()
+)
 
 @
 
+\section{ART}
+
+Getting patients on ART is the main interest of this analysis. I am still unclear how to calculate the proportion of the population that are on ART. (ie. proportion of population who are on ART that are alive/ linked and alive/ ...? ) The current model has \textbf{arvFollowTime} and the event is \textbf{ART}.
+
+\begin{enumerate}
+\item arvFollowTime: If the patient is on ART, then arv diff. If not, then lastdate $-$ minDate
+\item arv diff: arv status delay $+$ 1
+\item lastdate: same as above, but associate with LTFU
+\end{enumerate}
+
+JD suggested censoring patients who reached the end date, and for LTFU before the end date, we want to keep them in the demoninator and will counts against us.
+
+<<ART, message=FALSE,warning=FALSE >>=
+
+survTable <- survTable %>% 
+  mutate(No_ART_delay = ifelse(death_ever, death_delay, endDate-minDate)
+         , ART_delay = ifelse(arv_ever,arv_diff,No_ART_delay))
+ 
+ART <- survfit(
+  Surv(ART_delay, arv_ever) ~ 1
+  , data=survTable
+)
+
+ARTDF <- survDF(ART)
+
+print(ggplot(ARTDF, aes(time,cumprob))
+	+ geom_line() 
+	+ ggtitle("Proportion Of getting onto ART")
+	+ ylab("Probability")
+	+ theme_bw()
+)
+
+@
 
 
 \end{document}
