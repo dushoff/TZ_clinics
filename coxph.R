@@ -4,7 +4,7 @@ library(survival)
 ## Linked baseline coxph ----
 
 LinkedFirstcph <- coxph(
-  Surv(followTime, LTFU_status)~factor(sex_first)
+  Surv(lost_delay, lost_status)~factor(sex_first)
   + factor(enrolYear)
   , data=survTable
 )
@@ -62,7 +62,7 @@ print(drop1(LinkedAgeBHFcd4,test = "Chisq"))
 ##ART 
 
 ARTFirstcph <- coxph(
-  Surv(arvFollowTime, arv_ever)~factor(sex_first)
+  Surv(ART_delay, arv_ever)~factor(sex_first)
   + factor(enrolYear)
   , data=survTable
 )
