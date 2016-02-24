@@ -52,25 +52,7 @@ I am going to overwrite/create new lost status. The event of interest is lost, a
 
 <<Linked, message=FALSE,warning=FALSE>>=
 
-survTable <- (survTable %>% 
-  mutate(lost_status = ifelse(death_ever,
-                              FALSE,LTFU_status)
-         , lost_delay = ifelse(death_ever, 
-                               death_delay, followTime))
-)
-
-Linked <- survfit(
-  Surv(lost_delay, lost_status)~ 1
-  , data = survTable)
-
-LinkedDF <- survDF(Linked)
-
-print(ggplot(LinkedDF, aes(time,surv))
-	+ geom_line() 
-	+ ggtitle("Proportion Linked and Alive")
-	+ ylab("Probability")
-	+ theme_bw()
-)
+print(Linked_plot)
 
 @
 
@@ -84,29 +66,90 @@ Getting patients on ART is the main interest of this analysis. I am still unclea
 \item lastdate: same as above, but associate with LTFU
 \end{enumerate}
 
-JD suggested censoring patients who reached the end date, and for LTFU before the end date, we want to keep them in the demoninator and will counts against us.
+JD suggested censoring patients who reached the end date, and for LTFU before the end date, we want to keep them in the demoninator and will count against us.
 
-<<ART, message=FALSE,warning=FALSE >>=
+<<ART, message=FALSE,warning=FALSE,echo=FALSE>>=
 
-survTable <- survTable %>% 
-  mutate(No_ART_delay = ifelse(death_ever, death_delay, endDate-minDate)
-         , ART_delay = ifelse(arv_ever,arv_diff,No_ART_delay))
- 
-ART <- survfit(
-  Surv(ART_delay, arv_ever) ~ 1
-  , data=survTable
-)
+print(ART_plot)
 
-ARTDF <- survDF(ART)
+@
 
-print(ggplot(ARTDF, aes(time,cumprob))
-	+ geom_line() 
-	+ ggtitle("Proportion Of getting onto ART")
-	+ ylab("Probability")
-	+ theme_bw()
-)
+A potential problem/interest is analyzing patients who died after getting on ART. Right now, we censored patients who died before ART. 
+
+\section{Covariate extensions}
+
+Now we want to add covariates to the models above.
+
+\begin{enumerate}
+\item Sex
+\item Enrolment Year
+\item Health Facility
+\item Age Group (categorized in two different formats, right exclusive)
+\end{enumerate}
+
+\subsection{Linked with covariates}
+
+<<Linked with covariates, echo=FALSE,warning=FALSE,message=FALSE>>=
+
+print(LinkedSex_plot)
+print(LinkedYear_plot)
+print(LinkedHF_plot)
+print(LinkedAgecatA_plot)
+print(LinkedAgecatB_plot)
+
+@
+
+\subsection{ART with covariates}
+
+<<ART with covariates, echo=FALSE,warning=FALSE,message=FALSE>>=
+
+print(ARTSex_plot)
+print(ARTYear_plot)
+print(ARTHF_plot)
+print(ARTAgecatA_plot)
+print(ARTAgecatB_plot)
 
 @
 
 
+\section{CoxPH}
+
+We will include all covariates/mortaliy risk and use the Cox proportional hazard model to model it.
+
+\subsection{Linked CoxPH}
+<<Linked coxph, echo=FALSE,warning=FALSE,message=FALSE>>=
+
+Linkedcph <- coxph(
+  Surv(lost_delay, lost_status)~ factor(sex_first)
+  + enrolYear
+  + hf_type_first
+  + agecatA
+  , data = survTable)
+
+print(Linkedcph)
+@
+
+
+<<Linked coxph anova, echo=FALSE,warning=FALSE,message=FALSE>>=
+
+print(anova(Linkedcph))
+@
+
+\subsection{ART CoxPH}
+<<ART coxph summary, echo=FALSE,warning=FALSE,message=FALSE>>=
+
+ARTcph <- coxph(
+  Surv(ART_delay, arv_ever)~ factor(sex_first)
+  + enrolYear
+  + hf_type_first
+  + agecatA
+  , data = survTable)
+
+print(ARTcph)
+@
+
+<<ART coxph anova, echo=FALSE,warning=FALSE,message=FALSE>>=
+
+print(anova(ARTcph))
+@
 \end{document}

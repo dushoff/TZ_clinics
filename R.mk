@@ -59,3 +59,13 @@ survival_plots.%.Rout: survival.%.Rout survival_plots.R
 Sources += coxph.R 
 coxph.%.Rout: survival.%.Rout coxph.R
 	      $(run-R)
+
+Sources += summary.Rnw
+%.tex: %.Rnw survival_plots.sample.Rout
+  echo "library('knitr'); knit(\"$*.Rnw\")" | R --slave
+
+%.pdf: %.tex
+       texi2dvi -p $*.tex
+
+%.pdf.now: %.pdf
+	   evince summary.pdf

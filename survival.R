@@ -4,25 +4,24 @@
 library(survival)
 library(dplyr)
 library(ggplot2)
-#library(rms)
 
-# calculating day difference via dplyr for survival objects ----
+# Helper functions ----
 
 eliDate <- as.Date("2015-04-01")
 
 catage1 <- function(age){
   if(age < floor(year)){return("0-1 years")}
   if(age %in% c(floor(year):floor(5*year)-1)){return("1-4 years")}
-  if(age %in% c(floor(5*year):floor(10*year)-1)){return("5-9 years")}
-  if(age >= floor(10*year)){return("10-14 years")}
+  if(age %in% c(floor(5*year):floor(10*year)-1)){return("4-9 years")}
+  if(age >= floor(10*year)){return("Greater than 9")}
 }
 
 
 catage2 <- function(age){
-  if(age < floor(2*year)){return("0-1 year")}
-  if(age %in% c(floor(2*year):(floor(6*year)-1))){return("2-5 years")}
+  if(age < floor(2*year)){return("0-2 year")}
+  if(age %in% c(floor(2*year):(floor(6*year)-1))){return("2-6 years")}
   if(age %in% c(floor(6*year):(floor(10*year)-1))){return("6-9 years")}
-  if(age >= floor(10*year)){return("10-14 years")}
+  if(age >= floor(10*year)){return("Greater than 9")}
 }
 
 catageE1 <- function(age){
@@ -38,6 +37,8 @@ catageE2 <- function(age){
   if(age %in% c((floor(3*year)+ 1):floor(5*year))){return("between 37-60 months")}
   if(age > floor(5*year)){return("above 5 years")}
 }
+
+
 
 # Clean up minDate
 survTable <- (patientTable %>% 
@@ -61,5 +62,9 @@ survTable <- (patientTable %>%
  		, agecatEB = catageE2(real_age)
 		, death_ever = !is.na(dateofdeath_first)
 		, death_delay = ifelse(death_ever,dateofdeath_first - minDate + 1,followTime)
+		, lost_status = ifelse(death_ever,FALSE,LTFU_status)
+		, lost_delay = ifelse(death_ever,death_delay, followTime)
+		, No_ART_delay = ifelse(death_ever, death_delay, endDate-minDate)
+		, ART_delay = ifelse(arv_ever,arv_diff,No_ART_delay)
 	)
 )
