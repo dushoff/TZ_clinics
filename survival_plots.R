@@ -6,6 +6,7 @@ scale_fill_discrete <- function(...,palette="Set1")
 zmargin <- theme(panel.margin=grid::unit(0,"lines"))
 library(survival)
 library(dplyr)
+library(GGally)
 
 ## helper functions ----
 survDF <- function(x){
@@ -34,12 +35,11 @@ Linked <- survfit(
   Surv(lost_delay, lost_status)~ 1
   , data = survTable)
 
-LinkedDF <- survDF(Linked)
-
-print(Linked_plot<- ggplot(LinkedDF, aes(time,surv))
+print(Linked_plot<- ggsurv(Linked,plot.cens=FALSE)
       + geom_line() 
       + ggtitle("Proportion Linked and Alive")
       + ylab("Proportion")
+      + xlab("Day Lag")
       + scale_x_continuous(limits = c(0,1500))
       + scale_y_continuous(limits = c(0,1))
 )
@@ -57,6 +57,7 @@ print(ART_plot<- ggplot(ARTDF, aes(time,cumprob))
       + geom_line() 
       + ggtitle("Proportion Of getting onto ART")
       + ylab("Proportion")
+      + xlab("Day Lag")
       + scale_x_continuous(limits = c(0,1500))
       + scale_y_continuous(limits = c(0,1))
 )
@@ -64,11 +65,8 @@ print(ART_plot<- ggplot(ARTDF, aes(time,cumprob))
 ## Linked by Gender ----
 LinkedSex <- update(Linked,.~sex_first)
 
-LinkedSexDF <- survDF(LinkedSex)
-
-print(LinkedSex_plot<- ggplot(LinkedSexDF, aes(time,surv,colour=strata))
-          + geom_line() 
-          + ggtitle("Linked and Alive by gender")
+print(LinkedSex_plot<- ggsurv(LinkedSex,plot.cens=FALSE)
+          + ggtitle("Linked and Alive by Sex")
           + ylab("Proportion")
           + xlab("Day Lag")
           + scale_x_continuous(limits = c(0,1500))
@@ -80,10 +78,7 @@ print(LinkedSex_plot<- ggplot(LinkedSexDF, aes(time,surv,colour=strata))
 
 LinkedYear <- update(Linked,.~enrolYear)
 
-LinkedYearDF <- survDF(LinkedYear)
-
-print(LinkedYear_plot<-ggplot(LinkedYearDF, aes(time,surv,colour=strata))
-      + geom_line() 
+print(LinkedYear_plot<-ggsurv(LinkedYear,plot.cens=FALSE)
       + ggtitle("Linked and Alive by Enrollment Year")
       + ylab("Proportion")
       + xlab("Day Lag")
@@ -96,10 +91,7 @@ print(LinkedYear_plot<-ggplot(LinkedYearDF, aes(time,surv,colour=strata))
 
 LinkedAgecatA <- update(Linked,.~agecatA)
 
-LinkedAgecatA <- survDF(LinkedAgecatA)
-
-print(LinkedAgecatA_plot<-ggplot(LinkedAgecatA, aes(time,surv,colour=strata))
-      + geom_line() 
+print(LinkedAgecatA_plot<-ggsurv(LinkedAgecatA, plot.cens=FALSE)
       + ggtitle("Linked and Alive by AgecatA")
       + ylab("Proportion")
       + xlab("Day Lag")
@@ -113,10 +105,7 @@ print(LinkedAgecatA_plot<-ggplot(LinkedAgecatA, aes(time,surv,colour=strata))
 
 LinkedAgecatB <- update(Linked,.~agecatB)
 
-LinkedAgecatB <- survDF(LinkedAgecatB)
-
-print(LinkedAgecatB_plot<-ggplot(LinkedAgecatB, aes(time,surv,colour=strata))
-      + geom_line() 
+print(LinkedAgecatB_plot<-ggsurv(LinkedAgecatB, plot.cens=FALSE)
       + ggtitle("Linked and Alive by AgecatB")
       + ylab("Proportion")
       + xlab("Day Lag")
@@ -130,10 +119,7 @@ print(LinkedAgecatB_plot<-ggplot(LinkedAgecatB, aes(time,surv,colour=strata))
 
 LinkedHF <- update(Linked,.~hf_type_first)
 
-LinkedHF <- survDF(LinkedHF)
-
-print(LinkedHF_plot<-ggplot(LinkedHF, aes(time,surv,colour=strata))
-      + geom_line() 
+print(LinkedHF_plot<-ggsurv(LinkedHF, plot.cens=FALSE)
       + ggtitle("Linked and Alive by HF")
       + ylab("Proportion")
       + xlab("Day Lag")

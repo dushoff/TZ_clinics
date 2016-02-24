@@ -32,7 +32,8 @@ opts_chunk$set(fig.width=6,fig.height=4)
 library("plyr")
 library("dplyr")
 library("survival")
-load("survival_plots.sample.RData")
+library("GGally")
+load("survival_plots.visits.RData")
 @
 
 \section{Linked and Alive}
@@ -48,13 +49,15 @@ The old method does not handle dead patients properly, where we take,
 \item minDate: first visit date
 \end{enumerate}
 
-I am going to overwrite/create new lost status. The event of interest is lost, and censored if they die, or reach end date.
+I created a new lost status. The event of interest is lost, and censored if they die, or reach end date. The plot below is generated from the new set of rules.
 
-<<Linked, message=FALSE,warning=FALSE>>=
+<<Linked, message=FALSE,warning=FALSE,echo=FALSE>>=
 
 print(Linked_plot)
 
 @
+
+The curve starts after half a year because that is when we decided to mark the patient as \textbf{lost}. Note: there are some that are censored in that half year period due to death or reached end date within the half year period from their first visit.
 
 \section{ART}
 
@@ -66,7 +69,7 @@ Getting patients on ART is the main interest of this analysis. I am still unclea
 \item lastdate: same as above, but associate with LTFU
 \end{enumerate}
 
-JD suggested censoring patients who reached the end date, and for LTFU before the end date, we want to keep them in the demoninator and will count against us.
+JD suggested censoring patients who reached the end date, and for LTFU before the end date, we want to keep them in the demoninator and will count against us. The plot below does this.
 
 <<ART, message=FALSE,warning=FALSE,echo=FALSE>>=
 
@@ -87,10 +90,11 @@ Now we want to add covariates to the models above.
 \item Age Group (categorized in two different formats, right exclusive)
 \end{enumerate}
 
+For more information on the age groupings, please refer to the doc in google drive.
+
 \subsection{Linked with covariates}
 
 <<Linked with covariates, echo=FALSE,warning=FALSE,message=FALSE>>=
-
 print(LinkedSex_plot)
 print(LinkedYear_plot)
 print(LinkedHF_plot)
@@ -152,4 +156,6 @@ print(ARTcph)
 
 print(anova(ARTcph))
 @
+
+This concludes our basic analysis. For more detail coxph stuff, please go to the wiki.
 \end{document}
