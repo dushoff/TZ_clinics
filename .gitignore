@@ -28,3 +28,7 @@ compiler.mk
 
 *.makestuff
 *.html
+*.tex
+
+makestuff/
+*.gz
