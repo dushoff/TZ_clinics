@@ -38,38 +38,31 @@ load("survival_plots.visits.RData")
 
 \section{Linked and Alive}
 
-Before looking at getting onto ART, we want to check/see how many people are \textit{Linked} to the program. (ie. still observable/ coming in for check ups) We have to be very careful when we set it up and how to handle dead patients. Let's assume dead patients are \textbf{\textit{NOT AT RISK of getting LOST}}
+Before looking at getting onto ART, we want to check/see how many people are \textit{Linked and Alive} to the program. (ie. still observable/ coming in for check ups) We have to be very careful when we set it up and how to handle dead patients. 
 
-The old method does not handle dead patients properly, where we take,
-\textbf{followTime}, and \textbf{LTFUstatus} (lost or not).
-\begin{enumerate}
-\item followTime: lastdate $-$ minDate
-\item lastdate: EndDate if they are not lost, followUp date if they are lost
-\item followUp date: Last observation date $+$ half a year
-\item minDate: first visit date
-\end{enumerate}
+\begin{itemize}
+\item Start time: First observation
+\item Hazard event: LTFU or death
+\item Censoring event: End date
+\end{itemize}
 
-I created a new lost status. The event of interest is lost, and censored if they die, or reach end date. The plot below is generated from the new set of rules.
 
 <<Linked, message=FALSE,warning=FALSE,echo=FALSE>>=
 
-print(Linked_plot)
+print(PLA_plot)
 
 @
 
-The curve starts after half a year because that is when we decided to mark the patient as \textbf{lost}. Note: there are some that are censored in that half year period due to death or reached end date within the half year period from their first visit.
 
 \section{ART}
 
-Getting patients on ART is the main interest of this analysis. I am still unclear how to calculate the proportion of the population that are on ART. (ie. proportion of population who are on ART that are alive/ linked and alive/ ...? ) The current model has \textbf{arvFollowTime} and the event is \textbf{ART}.
+Getting patients on ART is the main interest of this analysis. 
 
-\begin{enumerate}
-\item arvFollowTime: If the patient is on ART, then arv diff. If not, then lastdate $-$ minDate
-\item arv diff: arv status delay $+$ 1
-\item lastdate: same as above, but associate with LTFU
-\end{enumerate}
-
-JD suggested censoring patients who reached the end date, and for LTFU before the end date, we want to keep them in the demoninator and will count against us. The plot below does this.
+\begin{itemize}
+\item Start date: First observation (might want to consider birth date later)
+\item Hazard event: ARV start
+\item Censoring event: End date
+\end{itemize}
 
 <<ART, message=FALSE,warning=FALSE,echo=FALSE>>=
 
@@ -95,10 +88,10 @@ For more information on the age groupings, please refer to the doc in google dri
 \subsection{Linked with covariates}
 
 <<Linked with covariates, echo=FALSE,warning=FALSE,message=FALSE>>=
-print(LinkedSex_plot)
-print(LinkedYear_plot)
-print(LinkedHF_plot)
-print(LinkedAgecatA_plot)
+print(PLASex_plot)
+print(PLAYear_plot)
+print(PLAHF_plot)
+print(PLAAgecatA_plot)
 
 @
 
@@ -121,27 +114,27 @@ We will include all covariates/mortaliy risk and use the Cox proportional hazard
 \subsection{Linked CoxPH}
 <<Linked coxph, echo=FALSE,warning=FALSE,message=FALSE>>=
 
-Linkedcph <- coxph(
-  Surv(lost_delay, lost_status)~ factor(sex_first)
+PLAcph <- coxph(
+  Surv(LA_delay, LA_status)~ factor(sex_first)
   + enrolYear
   + hf_type_first
   + agecatA
   , data = survTable)
 
-print(Linkedcph)
+print(PLAcph)
 @
 
 
 <<Linked coxph anova, echo=FALSE,warning=FALSE,message=FALSE>>=
 
-print(anova(Linkedcph))
+print(anova(PLAcph))
 @
 
 \subsection{ART CoxPH}
 <<ART coxph summary, echo=FALSE,warning=FALSE,message=FALSE>>=
 
 ARTcph <- coxph(
-  Surv(ART_delay, arv_ever)~ factor(sex_first)
+  Surv(arv_delay, arv_ever)~ factor(sex_first)
   + enrolYear
   + hf_type_first
   + agecatA
@@ -155,5 +148,4 @@ print(ARTcph)
 print(anova(ARTcph))
 @
 
-This concludes our basic analysis. For more detail coxph stuff, please go to the wiki.
 \end{document}

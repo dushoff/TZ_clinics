@@ -43,12 +43,19 @@ catageE2 <- function(age){
 # Clean up minDate
 survTable <- (patientTable %>% 
   group_by(patientid) %>% 
-	mutate(e_diff= eligible_status_delay2 + 1
+	mutate(lastdate = ifelse(LTFU_status, followUp, endDate)
+	  , followTime = lastdate-as.numeric(minDate) 
+	  , death_ever = !is.na(dateofdeath_first)
+	  , death_delay = ifelse(death_ever,(dateofdeath_first - minDate + 1)/year,followTime/year)
+	  , LA_status = ifelse(death_ever,TRUE,LTFU_status)
+	  , LA_delay = ifelse(LA_status,death_delay,(endDate-minDate)/year)
+	  , arv_ever = !is.na(arv_status_delay) #arv treatment at all 
+	  , arv_diff = arv_status_delay + 1
+	  , arv_delay = ifelse(arv_ever, arv_diff/year, (endDate-minDate)/year)
+	  , e_diff= eligible_status_delay2 + 1
 	  , eligible_ever = !is.na(eligible_status_delay2)
 	  , eligibleTime = ifelse(eligible_ever,e_diff,eliDate-as.numeric(minDate))
-		, arv_ever = !is.na(arv_status_delay) #arv treatment at all 
-		, arv_diff = arv_status_delay + 1
-		, lastdate = ifelse(LTFU_status, followUp, endDate)
+	  , lastdate = ifelse(LTFU_status, followUp, endDate)
 		, arvFollowTime = ifelse(
 			arv_ever, arv_diff, lastdate - as.numeric(minDate) 
 		)
@@ -60,8 +67,6 @@ survTable <- (patientTable %>%
 		, agecatB = catage2(real_age)
  		, agecatEA = catageE1(real_age)
  		, agecatEB = catageE2(real_age)
-		, death_ever = !is.na(dateofdeath_first)
-		, death_delay = ifelse(death_ever,dateofdeath_first - minDate + 1,followTime)
 		, lost_status = ifelse(death_ever,FALSE,LTFU_status)
 		, lost_delay = ifelse(death_ever,death_delay, followTime)
 		, No_ART_delay = ifelse(death_ever, death_delay, endDate-minDate)

@@ -29,25 +29,25 @@ survDF <- function(x){
   return(tempdf)
 }
 
-### Linked----
+### PLA----
 
-Linked <- survfit(
-  Surv(lost_delay, lost_status)~ 1
+PLA <- survfit(
+  Surv(LA_delay, LA_status)~ 1
   , data = survTable)
 
-print(Linked_plot<- ggsurv(Linked,plot.cens=FALSE)
+print(PLA_plot<- ggsurv(PLA,plot.cens=FALSE)
       + geom_line() 
       + ggtitle("Proportion Linked and Alive")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
 )
 
 ## ART (Yes or No) ----
 
 ART <- survfit(
-  Surv(ART_delay, arv_ever) ~ 1
+  Surv(arv_delay, arv_ever) ~ 1
   , data=survTable
 )
 
@@ -57,73 +57,73 @@ print(ART_plot<- ggplot(ARTDF, aes(time,cumprob))
       + geom_line() 
       + ggtitle("Proportion Of getting onto ART")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
 )
 
-## Linked by Gender ----
-LinkedSex <- update(Linked,.~sex_first)
+## PLA by Gender ----
+PLASex <- update(PLA,.~sex_first)
 
-print(LinkedSex_plot<- ggsurv(LinkedSex,plot.cens=FALSE)
+print(PLASex_plot<- ggsurv(PLASex,plot.cens=FALSE)
           + ggtitle("Linked and Alive by Sex")
           + ylab("Proportion")
-          + xlab("Day Lag")
-          + scale_x_continuous(limits = c(0,1500))
+          + xlab("Year Lag")
+          + scale_x_continuous(limits = c(0,4.25))
           + scale_y_continuous(limits = c(0,1))
           
 )
 
-## Linked by Enrollment Year
+## PLA by Enrollment Year
 
-LinkedYear <- update(Linked,.~enrolYear)
+PLAYear <- update(PLA,.~enrolYear)
 
-print(LinkedYear_plot<-ggsurv(LinkedYear,plot.cens=FALSE)
+print(PLAYear_plot<-ggsurv(PLAYear,plot.cens=FALSE)
       + ggtitle("Linked and Alive by Enrollment Year")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
 )
 
-## Linked by Agecat 1 ----
+## PLA by Agecat 1 ----
 
-LinkedAgecatA <- update(Linked,.~agecatA)
+PLAAgecatA <- update(PLA,.~agecatA)
 
-print(LinkedAgecatA_plot<-ggsurv(LinkedAgecatA, plot.cens=FALSE)
+print(PLAAgecatA_plot<-ggsurv(PLAAgecatA, plot.cens=FALSE)
       + ggtitle("Linked and Alive by AgecatA")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
       
 )
 
-## Linked by Agecat 2 ----
+## PLA by Agecat 2 ----
 
-LinkedAgecatB <- update(Linked,.~agecatB)
+PLAAgecatB <- update(PLA,.~agecatB)
 
-print(LinkedAgecatB_plot<-ggsurv(LinkedAgecatB, plot.cens=FALSE)
+print(PLAAgecatB_plot<-ggsurv(PLAAgecatB, plot.cens=FALSE)
       + ggtitle("Linked and Alive by AgecatB")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
       
 )
 
-## Linked by Health Facility ----
+## PLA by Health Facility ----
 
-LinkedHF <- update(Linked,.~hf_type_first)
+PLAHF <- update(PLA,.~hf_type_first)
 
-print(LinkedHF_plot<-ggsurv(LinkedHF, plot.cens=FALSE)
+print(PLAHF_plot<-ggsurv(PLAHF, plot.cens=FALSE)
       + ggtitle("Linked and Alive by HF")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
       
@@ -138,8 +138,8 @@ print(ARTSex_plot<-ggplot(ARTSexDF, aes(time,cumprob,colour=strata))
              + geom_line() 
              + ggtitle("ART by gender")
              + ylab("Proportion")
-             + xlab("Day Lag")
-             + scale_x_continuous(limits = c(0,1500))
+             + xlab("Year Lag")
+             + scale_x_continuous(limits = c(0,4.25))
              + scale_y_continuous(limits = c(0,1))
       
              
@@ -154,7 +154,7 @@ print(ARTYear_plot<-ggplot(ARTYearDF, aes(time,cumprob,colour=strata))
               + geom_line() 
               + ggtitle("ART by Enrolment Year")
               + ylab("Proportion")
-              + xlab("Day Lag")
+              + xlab("Year Lag")
               
 )
 
@@ -168,8 +168,8 @@ print(ARTAgecatA_plot<-ggplot(ARTAgecatA, aes(time,cumprob,colour=strata))
       + geom_line() 
       + ggtitle("ART by AgecatA")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
       
@@ -185,8 +185,8 @@ print(ARTAgecatB_plot<-ggplot(ARTAgecatB, aes(time,cumprob,colour=strata))
       + geom_line() 
       + ggtitle("ART by AgecatB")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
       
@@ -203,8 +203,8 @@ print(ARTHF_plot<-ggplot(ARTHF, aes(time,cumprob,colour=strata))
       + geom_line() 
       + ggtitle("ART by HF")
       + ylab("Proportion")
-      + xlab("Day Lag")
-      + scale_x_continuous(limits = c(0,1500))
+      + xlab("Year Lag")
+      + scale_x_continuous(limits = c(0,4.25))
       + scale_y_continuous(limits = c(0,1))
       
       
