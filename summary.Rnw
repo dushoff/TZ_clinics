@@ -87,7 +87,7 @@ Now we want to add covariates to the models above.
 \item Sex
 \item Enrolment Year
 \item Health Facility
-\item Age Group (categorized in two different formats, right exclusive)
+\item Age Group (right exclusive)
 \end{enumerate}
 
 For more information on the age groupings, please refer to the doc in google drive.
@@ -99,7 +99,6 @@ print(LinkedSex_plot)
 print(LinkedYear_plot)
 print(LinkedHF_plot)
 print(LinkedAgecatA_plot)
-print(LinkedAgecatB_plot)
 
 @
 
@@ -111,7 +110,6 @@ print(ARTSex_plot)
 print(ARTYear_plot)
 print(ARTHF_plot)
 print(ARTAgecatA_plot)
-print(ARTAgecatB_plot)
 
 @
 
